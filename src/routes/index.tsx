@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { Stage, Layer, Star, Text } from 'react-konva'
+import { Stage, Layer, Star, Text, Rect } from 'react-konva'
 import DataAllPlotRender from '../components/PlotRender'
 import { useMemo, useRef, useState } from 'react'
 import FieldRender from '../components/FieldRender'
@@ -13,6 +13,7 @@ import {
     modeSelectedAtom,
     addGrid,
     setAllPlotIntersectToSelect,
+    ETool,
 } from '../store/store'
 import { selectAtom } from 'jotai/utils'
 import Box from '@mui/material/Box'
@@ -21,14 +22,25 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { range } from '../utils/utils'
 import { DataSelectZoneRender } from '../components/SelectZone'
 import Inspector from '../components/Inspector'
+import { getAllGridOptions } from '../store/grid-store'
+import PathRender from '../components/PathRender'
+import { addPoint } from '../store/path-store'
 
 export const Route = createFileRoute('/')({
     component: HomeComponent,
 })
 
 function HomeComponent() {
-    const plots = useAtomValue(
-        useMemo(() => selectAtom(plotsAtom, (plots) => plots.length), [])
+    const plotIds = useAtomValue(
+        useMemo(
+            () =>
+                selectAtom(
+                    plotsAtom,
+                    (plots) => plots.map((elt) => elt.id),
+                    (a, b) => JSON.stringify(a) === JSON.stringify(b)
+                ),
+            []
+        )
     )
     const mode = useAtomValue(modeSelectedAtom)
     const setSelectedZone = useSetAtom(selectZoneAtom)
@@ -44,6 +56,15 @@ function HomeComponent() {
                                 id="mainLayer"
                                 onMouseDown={(event) => {
                                     if (event.target.attrs.id !== 'field') {
+                                        return
+                                    }
+                                    if (
+                                        ![
+                                            ETool.ADD_GRID,
+                                            ETool.ADD_PLOT,
+                                            ETool.NONE,
+                                        ].includes(mode)
+                                    ) {
                                         return
                                     }
                                     setSelectedZone({
@@ -81,17 +102,18 @@ function HomeComponent() {
                                             y2: selection.y2,
                                         })
                                     } else if (mode === 'Add grid') {
+                                        const gridOptions = getAllGridOptions()
                                         addGrid({
                                             x: selection.x,
                                             y: selection.y,
                                             x2: selection.x2,
                                             y2: selection.y2,
-                                            col: 3,
-                                            gapX: 5,
-                                            gapY: 5,
-                                            row: 3,
+                                            col: gridOptions.nbCol,
+                                            gapX: gridOptions.gapX,
+                                            gapY: gridOptions.gapY,
+                                            row: gridOptions.nbRow,
                                         })
-                                    } else if (mode === null) {
+                                    } else if (mode === ETool.NONE) {
                                         setAllPlotIntersectToSelect({
                                             x: selection.x,
                                             y: selection.y,
@@ -103,14 +125,31 @@ function HomeComponent() {
                                 }}
                             >
                                 <FieldRender width={width} height={height} />
-                                {range(plots).map((elt, index) => (
+                                {plotIds.map((id, index) => (
                                     <DataAllPlotRender
                                         plotIndex={index}
-                                        key={index}
+                                        key={id}
                                     />
                                 ))}
                                 <DataSelectZoneRender />
+                                <PathRender />
                             </Layer>
+                            {mode === ETool.MAKE_PATH && (
+                                <Layer>
+                                    <Rect
+                                        width={width}
+                                        height={height}
+                                        fill="transparent" // Vous pouvez aussi ajouter une couleur avec opacité.
+                                        onClick={(evt) => {
+                                            addPoint({
+                                                x: evt.evt.layerX,
+                                                y: evt.evt.layerY,
+                                            })
+                                        }}
+                                        listening={true} // Par défaut, activé pour capturer les événements.
+                                    />
+                                </Layer>
+                            )}
                         </Stage>
                     )}
                 </AutoSizer>

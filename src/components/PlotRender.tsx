@@ -7,8 +7,8 @@ import {
     selectZoneAtom,
     PlotInfo,
     plotsAtom,
-    removePlot,
     selectPlot,
+    ETool,
 } from '../store/store'
 
 export function PlotRender(props: {
@@ -24,13 +24,12 @@ export function PlotRender(props: {
             x={plotValue.x}
             y={plotValue.y}
             onClick={() => {
-                if (mode === 'Select plot' || mode === null)
-                    selectPlot(props.plotIndex)
-                if (mode === 'Remove plot') removePlot(props.plotIndex)
+                selectPlot(props.plotIndex)
             }}
             width={plotValue.width}
             height={plotValue.height}
             draggable
+            rotation={10}
         >
             <Rect
                 width={plotValue.width}

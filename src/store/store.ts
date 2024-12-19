@@ -1,5 +1,6 @@
 import { atom, getDefaultStore } from 'jotai'
-import { produce } from 'immer'
+import { current, produce } from 'immer'
+import { PrimitiveAtom } from 'jotai'
 export const store = getDefaultStore()
 export interface Rectangle {
     x: number
@@ -18,6 +19,10 @@ export interface PlotInfo {
     name?: string
 }
 export const idGenerator = atom<number>(1)
+export function getUniqueId() {
+    store.set(idGenerator, (old) => old + 1)
+    return store.get(idGenerator).toString()
+}
 
 export const plotsAtom = atom<PlotInfo[]>([])
 export const isDrag = atom<boolean>()
@@ -38,8 +43,7 @@ export const addPlot = ({
     if (Math.abs(x2 - x) < 2 || Math.abs(y2 - y) < 2) {
         return
     }
-    const id = store.get(idGenerator)
-    store.set(idGenerator, id + 1)
+    const id = getUniqueId()
     store.set(plotsAtom, (plots): PlotInfo[] => {
         return [
             ...plots,
@@ -95,9 +99,10 @@ export const selectPlot = (plotIndex: number) => {
         })
     )
 }
-export const removePlot = (plotIndex: number) => {
+
+export const removePlotById = (plotId: string) => {
     store.set(plotsAtom, (plots) => {
-        const newPlots = plots.filter((plot, index) => index !== plotIndex)
+        const newPlots = plots.filter((plot) => plot.id !== plotId)
         return newPlots
     })
 }
@@ -130,14 +135,42 @@ export function isIntersect(selection: Rectangle, item: Rectangle): boolean {
     return !noIntersection
 }
 
-export type ITool =
-    | 'Add plot'
-    | 'Remove plot'
-    | 'Select plot'
-    | 'Add grid'
-    | null
-export const modeSelectedAtom = atom<ITool>(null)
+export enum ETool {
+    ADD_PLOT = 'Add plot',
+    ADD_GRID = 'Add grid',
+    MAKE_PATH = 'Make path',
 
-export const selectTool = (tool: ITool) => {
-    store.set(modeSelectedAtom, (old) => (old === tool ? null : tool))
+    NONE = 'NONE',
 }
+export const modeSelectedAtom = atom<ETool>(ETool.NONE)
+
+export const selectTool = (tool: ETool) => {
+    store.set(modeSelectedAtom, (old) => (old === tool ? ETool.NONE : tool))
+}
+
+export const plotAtom = (plotId: string) =>
+    atom(
+        (get) => get(plotsAtom).find((elt) => elt.id === plotId)!, // Lecture de la valeur de la clé
+        (get, set, newValue: PlotInfo) => {
+            const currentObject = get(plotsAtom)
+            set(
+                plotsAtom,
+                produce((plots) => {
+                    const plotIndex = plots.findIndex(
+                        (elt) => elt.id === plotId
+                    )
+                    plots[plotIndex] = newValue
+                })
+            )
+        }
+    )
+export const plotField = (plotId: string, plotField: 'name') =>
+    atom(
+        (get) => get(plotAtom(plotId))[plotField] ?? '',
+        (get, set, newValue: string) => {
+            const atom = plotAtom(plotId)
+            const currentObject = get(atom)
+            if (!currentObject) return
+            set(atom, { ...currentObject, [plotField]: newValue })
+        }
+    ) as PrimitiveAtom<string>

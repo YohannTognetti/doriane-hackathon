@@ -2147,6 +2147,11 @@ its-fine@^1.1.1:
   dependencies:
     "@types/react-reconciler" "^0.28.0"
 
+jotai-optics@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/jotai-optics/-/jotai-optics-0.4.0.tgz#aad207090a06390e61cc85324b623b2692e2e272"
+  integrity sha512-osbEt9AgS55hC4YTZDew2urXKZkaiLmLqkTS/wfW5/l0ib8bmmQ7kBXSFaosV6jDDWSp00IipITcJARFHdp42g==
+
 jotai@^2.10.4:
   version "2.10.4"
   resolved "https://registry.yarnpkg.com/jotai/-/jotai-2.10.4.tgz#635f499c0fd0202f78c4d4115a71880f915ffdbd"
@@ -2347,6 +2352,11 @@ object.values@^1.1.6, object.values@^1.2.0:
     call-bound "^1.0.3"
     define-properties "^1.2.1"
     es-object-atoms "^1.0.0"
+
+optics-ts@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/optics-ts/-/optics-ts-2.4.1.tgz#de94bda2b0ed7fde5b7631283031b9699459d40d"
+  integrity sha512-HaYzMHvC80r7U/LqAd4hQyopDezC60PO2qF5GuIwALut2cl5rK1VWHsqTp0oqoJJWjiv6uXKqsO+Q2OO0C3MmQ==
 
 optionator@^0.9.3:
   version "0.9.4"
