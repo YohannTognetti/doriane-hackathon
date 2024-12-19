@@ -1,11 +1,11 @@
 import { atom } from 'jotai'
-import { getUniqueId, store } from './store'
+import { getUniqueId, IItem, managerAtom, store } from './global-store'
 
+export interface Path extends IItem<{ path: [] }> {}
 export interface IPoint {
     x: number
     y: number
 }
-export const pathListAtom = atom<{ id: string; path: IPoint[] }[]>([])
 
 export const pathAtom = atom<IPoint[]>([])
 
@@ -14,9 +14,10 @@ export function addPoint(point: IPoint) {
 }
 export function savePath() {
     const path = store.get(pathAtom)
-    store.set(pathListAtom, (old) => [
+    const id = getUniqueId()
+    store.set(managerAtom, (old) => ({
         ...old,
-        { id: getUniqueId(), path: path },
-    ])
+        [id]: { id: id, data: { path }, type: 'PATH' },
+    }))
     store.set(pathAtom, [])
 }

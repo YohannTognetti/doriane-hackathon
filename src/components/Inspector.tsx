@@ -8,10 +8,10 @@ import {
 } from '@mui/material'
 import React, { useEffect, useMemo, useState } from 'react'
 import {
+    IPlot,
     plotAtom,
     plotField,
     PlotInfo,
-    plotsAtom,
     removePlotById,
     selectTool,
 } from '../store/store'
@@ -19,21 +19,31 @@ import { useAtom, useAtomValue } from 'jotai'
 import { selectAtom } from 'jotai/utils'
 import DataInput from './Input'
 import { focusAtom } from 'jotai-optics'
+import { managerAtom } from '../store/global-store'
 
 export default function Inspector() {
     const [displayPlot, setDisplayPlot] = useState<string | null>(null)
     const selectedPlot = useAtomValue(
         useMemo(
             () =>
-                selectAtom(plotsAtom, (plots) =>
-                    plots.filter((elt) => elt.isSelected)
+                selectAtom(managerAtom, (items) =>
+                    Object.values(items)
+                        .filter((item): item is IPlot => item?.type === 'PLOT')
+                        .filter((elt) => elt.data.isSelected)
                 ),
             []
         )
     )
     useEffect(() => {
-        if (selectedPlot.length >= 1) {
+        console.log(selectedPlot)
+        if (
+            selectedPlot.length >= 1 &&
+            (displayPlot === null ||
+                selectedPlot.findIndex((elt) => elt.id === displayPlot) === -1)
+        ) {
             setDisplayPlot(selectedPlot[0].id)
+        } else if (selectedPlot.length === 0) {
+            setDisplayPlot(null)
         }
     }, [selectedPlot])
     const item = selectedPlot.find((plot) => plot.id === displayPlot)
@@ -58,11 +68,11 @@ export default function Inspector() {
                     {selectedPlot.map((elt) => (
                         <MenuItem
                             value={elt.id}
-                        >{`${elt.id} - ${elt.name ?? '_'}`}</MenuItem>
+                        >{`${elt.id} - ${elt.data.name ?? '_'}`}</MenuItem>
                     ))}
                 </Select>
             </FormControl>
-            {item && <PlotInspector plot={item} />}
+            {item && <PlotInspector plot={item.data} />}
         </Box>
     )
 }

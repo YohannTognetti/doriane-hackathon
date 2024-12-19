@@ -1,5 +1,5 @@
 import { atom } from 'jotai'
-import { store } from './store'
+import { store } from './global-store'
 
 export const gridNbRowAtom = atom('3')
 export const gridNbColAtom = atom('3')

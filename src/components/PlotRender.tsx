@@ -6,17 +6,12 @@ import {
     modeSelectedAtom,
     selectZoneAtom,
     PlotInfo,
-    plotsAtom,
     selectPlot,
     ETool,
 } from '../store/store'
+import { managerAtom } from '../store/global-store'
 
-export function PlotRender(props: {
-    plotValue: PlotInfo | undefined
-    plotIndex: number
-}) {
-    const mode = useAtomValue(modeSelectedAtom)
-
+export function PlotRender(props: { plotValue: PlotInfo }) {
     const plotValue = props.plotValue
     if (!plotValue) return null
     return (
@@ -24,12 +19,11 @@ export function PlotRender(props: {
             x={plotValue.x}
             y={plotValue.y}
             onClick={() => {
-                selectPlot(props.plotIndex)
+                selectPlot(plotValue.id)
             }}
             width={plotValue.width}
             height={plotValue.height}
             draggable
-            rotation={10}
         >
             <Rect
                 width={plotValue.width}
@@ -49,12 +43,12 @@ export function PlotRender(props: {
         </Group>
     )
 }
-export default function DataAllPlotRender(props: { plotIndex: number }) {
+export default function DataAllPlotRender(props: { plotId: string }) {
     const value = useAtomValue(
         useMemo(
-            () => selectAtom(plotsAtom, (plots) => plots[props.plotIndex]),
-            [props.plotIndex]
+            () => selectAtom(managerAtom, (items) => items[props.plotId]?.data),
+            [props.plotId]
         )
     )
-    return <PlotRender plotValue={value} plotIndex={props.plotIndex} />
+    return <PlotRender plotValue={value} />
 }

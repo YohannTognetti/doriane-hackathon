@@ -6,14 +6,13 @@ import { useMemo, useRef, useState } from 'react'
 import FieldRender from '../components/FieldRender'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import {
-    plotsAtom,
     addPlot,
     selectZoneAtom,
-    store,
     modeSelectedAtom,
     addGrid,
     setAllPlotIntersectToSelect,
     ETool,
+    IPlot,
 } from '../store/store'
 import { selectAtom } from 'jotai/utils'
 import Box from '@mui/material/Box'
@@ -25,6 +24,7 @@ import Inspector from '../components/Inspector'
 import { getAllGridOptions } from '../store/grid-store'
 import PathRender from '../components/PathRender'
 import { addPoint } from '../store/path-store'
+import { managerAtom, store } from '../store/global-store'
 
 export const Route = createFileRoute('/')({
     component: HomeComponent,
@@ -35,8 +35,13 @@ function HomeComponent() {
         useMemo(
             () =>
                 selectAtom(
-                    plotsAtom,
-                    (plots) => plots.map((elt) => elt.id),
+                    managerAtom,
+                    (items) =>
+                        Object.values(items)
+                            .filter(
+                                (item): item is IPlot => item?.type === 'PLOT'
+                            )
+                            .map((elt) => elt.id),
                     (a, b) => JSON.stringify(a) === JSON.stringify(b)
                 ),
             []
@@ -44,7 +49,7 @@ function HomeComponent() {
     )
     const mode = useAtomValue(modeSelectedAtom)
     const setSelectedZone = useSetAtom(selectZoneAtom)
-
+    console.log(plotIds)
     return (
         <Box display={'flex'} flex={'1'}>
             <Toolbox />
@@ -126,10 +131,7 @@ function HomeComponent() {
                             >
                                 <FieldRender width={width} height={height} />
                                 {plotIds.map((id, index) => (
-                                    <DataAllPlotRender
-                                        plotIndex={index}
-                                        key={id}
-                                    />
+                                    <DataAllPlotRender plotId={id} key={id} />
                                 ))}
                                 <DataSelectZoneRender />
                                 <PathRender />
