@@ -2,17 +2,11 @@ import { useAtomValue } from 'jotai'
 import { selectAtom } from 'jotai/utils'
 import { useMemo } from 'react'
 import { Group, Rect, Text } from 'react-konva'
-import {
-    modeSelectedAtom,
-    selectZoneAtom,
-    PlotInfo,
-    selectPlot,
-    ETool,
-} from '../store/store'
+import { PlotInfo, selectPlot, ETool, IPlotItem } from '../store/store'
 import { managerAtom } from '../store/global-store'
 
-export function PlotRender(props: { plotValue: PlotInfo }) {
-    const plotValue = props.plotValue
+export function PlotRender(props: { plot: IPlotItem }) {
+    const plotValue = props.plot.data
     if (!plotValue) return null
     return (
         <Group
@@ -28,7 +22,7 @@ export function PlotRender(props: { plotValue: PlotInfo }) {
             <Rect
                 width={plotValue.width}
                 height={plotValue.height}
-                fill={plotValue.isSelected ? '#0000FF20' : '#00FF0020'}
+                fill={props.plot.selected ? '#0000FF20' : '#00FF0020'}
                 stroke="black"
                 onDragStart={() => {}}
             ></Rect>
@@ -46,9 +40,10 @@ export function PlotRender(props: { plotValue: PlotInfo }) {
 export default function DataAllPlotRender(props: { plotId: string }) {
     const value = useAtomValue(
         useMemo(
-            () => selectAtom(managerAtom, (items) => items[props.plotId]?.data),
+            () => selectAtom(managerAtom, (items) => items[props.plotId]),
             [props.plotId]
         )
     )
-    return <PlotRender plotValue={value} />
+    if (!value) return
+    return <PlotRender plot={value} />
 }

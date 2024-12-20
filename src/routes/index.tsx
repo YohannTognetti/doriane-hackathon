@@ -1,57 +1,36 @@
-import * as React from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { Stage, Layer, Star, Text, Rect } from 'react-konva'
-import DataAllPlotRender from '../components/PlotRender'
-import { useMemo, useRef, useState } from 'react'
-import FieldRender from '../components/FieldRender'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import {
-    addPlot,
-    selectZoneAtom,
-    modeSelectedAtom,
-    addGrid,
-    setAllPlotIntersectToSelect,
-    ETool,
-    IPlot,
-} from '../store/store'
-import { selectAtom } from 'jotai/utils'
 import Box from '@mui/material/Box'
-import Toolbox from '../components/Toolbox'
+import { createFileRoute } from '@tanstack/react-router'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { Layer, Rect, Stage } from 'react-konva'
 import AutoSizer from 'react-virtualized-auto-sizer'
-import { range } from '../utils/utils'
-import { DataSelectZoneRender } from '../components/SelectZone'
+import Debug from '../components/Debug'
+import FieldRender from '../components/FieldRender'
 import Inspector from '../components/Inspector'
+import CurrentPathRender from '../components/path/CurrentPathRender'
+import { DataSelectZoneRender } from '../components/SelectZone'
+import Toolbox from '../components/LeftMenu'
+import { selectZoneAtom, store } from '../store/global-store'
 import { getAllGridOptions } from '../store/grid-store'
-import PathRender from '../components/PathRender'
 import { addPoint } from '../store/path-store'
-import { managerAtom, store } from '../store/global-store'
+import {
+    addGrid,
+    addPlot,
+    ETool,
+    modeSelectedAtom,
+    setAllPlotIntersectToSelect,
+} from '../store/store'
+import LayerRenderer from '../components/LayerRenderer'
 
 export const Route = createFileRoute('/')({
     component: HomeComponent,
 })
 
 function HomeComponent() {
-    const plotIds = useAtomValue(
-        useMemo(
-            () =>
-                selectAtom(
-                    managerAtom,
-                    (items) =>
-                        Object.values(items)
-                            .filter(
-                                (item): item is IPlot => item?.type === 'PLOT'
-                            )
-                            .map((elt) => elt.id),
-                    (a, b) => JSON.stringify(a) === JSON.stringify(b)
-                ),
-            []
-        )
-    )
     const mode = useAtomValue(modeSelectedAtom)
     const setSelectedZone = useSetAtom(selectZoneAtom)
-    console.log(plotIds)
     return (
         <Box display={'flex'} flex={'1'}>
+            <Debug />
             <Toolbox />
             <Box flex={'1'} minWidth={0}>
                 <AutoSizer>
@@ -130,11 +109,9 @@ function HomeComponent() {
                                 }}
                             >
                                 <FieldRender width={width} height={height} />
-                                {plotIds.map((id, index) => (
-                                    <DataAllPlotRender plotId={id} key={id} />
-                                ))}
+                                <LayerRenderer />
                                 <DataSelectZoneRender />
-                                <PathRender />
+                                <CurrentPathRender />
                             </Layer>
                             {mode === ETool.MAKE_PATH && (
                                 <Layer>

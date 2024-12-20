@@ -6,20 +6,13 @@ import {
     MenuItem,
     Select,
 } from '@mui/material'
-import React, { useEffect, useMemo, useState } from 'react'
-import {
-    IPlot,
-    plotAtom,
-    plotField,
-    PlotInfo,
-    removePlotById,
-    selectTool,
-} from '../store/store'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtomValue } from 'jotai'
 import { selectAtom } from 'jotai/utils'
-import DataInput from './Input'
-import { focusAtom } from 'jotai-optics'
+import { useEffect, useMemo, useState } from 'react'
 import { managerAtom } from '../store/global-store'
+import { IPlotItem, plotField, PlotInfo, removePlotById } from '../store/store'
+import DataInput from './Input'
+import { computePlotIntersection, pathAtom } from '../store/path-store'
 
 export default function Inspector() {
     const [displayPlot, setDisplayPlot] = useState<string | null>(null)
@@ -28,14 +21,15 @@ export default function Inspector() {
             () =>
                 selectAtom(managerAtom, (items) =>
                     Object.values(items)
-                        .filter((item): item is IPlot => item?.type === 'PLOT')
-                        .filter((elt) => elt.data.isSelected)
+                        .filter(
+                            (item): item is IPlotItem => item?.type === 'PLOT'
+                        )
+                        .filter((elt) => elt.selected)
                 ),
             []
         )
     )
     useEffect(() => {
-        console.log(selectedPlot)
         if (
             selectedPlot.length >= 1 &&
             (displayPlot === null ||
@@ -57,12 +51,12 @@ export default function Inspector() {
             gap={'16px'}
         >
             <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Age</InputLabel>
+                <InputLabel id="demo-simple-select-label">Items</InputLabel>
                 <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
-                    value={displayPlot}
-                    label="Plot"
+                    value={displayPlot ?? ''}
+                    label="Items"
                     onChange={(event) => setDisplayPlot(event.target.value)}
                 >
                     {selectedPlot.map((elt) => (
@@ -72,7 +66,8 @@ export default function Inspector() {
                     ))}
                 </Select>
             </FormControl>
-            {item && <PlotInspector plot={item.data} />}
+            {item && item.type === 'PLOT' && <PlotInspector plot={item.data} />}
+            <PathInspector />
         </Box>
     )
 }
@@ -89,6 +84,28 @@ function PlotInspector({ plot }: { plot: PlotInfo }) {
             >
                 Remove plot
             </Button>
+        </Box>
+    )
+}
+
+function PathInspector() {
+    const [plots, setPlots] = useState<string[]>()
+    const path = useAtomValue(pathAtom)
+    return (
+        <Box width="100%" display={'flex'} flexDirection={'column'} gap={'8px'}>
+            <Box>Path :</Box>
+            <Button
+                onClick={() => setPlots(computePlotIntersection())}
+                color="info"
+                variant="contained"
+            >
+                Compute plots
+            </Button>
+            {plots?.map((plotId, index) => (
+                <Box key={plotId}>
+                    {index} : Plot - {plotId}
+                </Box>
+            ))}
         </Box>
     )
 }

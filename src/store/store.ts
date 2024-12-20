@@ -14,15 +14,12 @@ export interface PlotInfo {
     y: number
     width: number
     height: number
-    isSelected?: boolean
     id: string
     name?: string
 }
-export interface IPlot extends IItem<PlotInfo> {}
+export interface IPlotItem extends IItem<PlotInfo> {}
 
 export const isDrag = atom<boolean>()
-
-export const selectZoneAtom = atom<Rectangle | undefined>(undefined)
 
 export const addPlot = ({
     x,
@@ -94,7 +91,7 @@ export const selectPlot = (id: string) => {
             if (!item || item.type !== 'PLOT') {
                 return
             }
-            item.data.isSelected = !item.data.isSelected
+            item.selected = !item.selected
         })
     )
 }
@@ -111,12 +108,12 @@ export const setAllPlotIntersectToSelect = (selection: Rectangle) => {
         managerAtom,
         produce((items) => {
             Object.values(items)
-                .filter((item): item is IPlot => {
+                .filter((item): item is IPlotItem => {
                     return item?.type === 'PLOT'
                 })
                 .forEach((item) => {
-                    if (item.data.isSelected) {
-                        item.data.isSelected = false
+                    if (item.selected) {
+                        item.selected = false
                     }
                     if (
                         isIntersect(selection, {
@@ -126,7 +123,7 @@ export const setAllPlotIntersectToSelect = (selection: Rectangle) => {
                             y2: item.data.y + item.data.height,
                         })
                     ) {
-                        item.data.isSelected = true
+                        item.selected = true
                     }
                 })
         })
@@ -154,7 +151,7 @@ export const selectTool = (tool: ETool) => {
 
 export const plotAtom = (plotId: string) =>
     atom(
-        (get) => get(managerAtom)[plotId] as IPlot, // Lecture de la valeur de la clé
+        (get) => get(managerAtom)[plotId] as IPlotItem, // Lecture de la valeur de la clé
         (get, set, newValue: PlotInfo) => {
             const currentObject = get(managerAtom)
             set(

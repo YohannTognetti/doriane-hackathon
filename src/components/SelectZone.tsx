@@ -1,10 +1,9 @@
 import { useAtomValue } from 'jotai'
 import { Rect } from 'react-konva'
-import { selectZoneAtom } from '../store/store'
+import { selectZoneAtom } from '../store/global-store'
 
 export function DataSelectZoneRender() {
     const value = useAtomValue(selectZoneAtom)
-    console.log(value)
     if (!value) return null
     return (
         <Rect

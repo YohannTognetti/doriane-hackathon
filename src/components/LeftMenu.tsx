@@ -1,4 +1,4 @@
-import { Button, Input, TextField } from '@mui/material'
+import { Button, Checkbox, Input, TextField } from '@mui/material'
 import Box from '@mui/material/Box'
 import { useAtom, useAtomValue } from 'jotai'
 import { ETool, modeSelectedAtom, selectTool } from '../store/store'
@@ -10,6 +10,14 @@ import {
     gridNbRowAtom,
 } from '../store/grid-store'
 import { savePath } from '../store/path-store'
+import {
+    itemAtom,
+    itemsAtom,
+    managerAtom,
+    selectItem,
+    store,
+} from '../store/global-store'
+import { useMemo } from 'react'
 
 export default function Toolbox() {
     const modeSelected = useAtomValue(modeSelectedAtom)
@@ -26,6 +34,7 @@ export default function Toolbox() {
                 { mode: ETool.MAKE_PATH, label: 'Make path' },
             ].map((elt) => (
                 <Button
+                    key={elt.mode}
                     onClick={() => {
                         selectTool(elt.mode)
                     }}
@@ -34,7 +43,16 @@ export default function Toolbox() {
                     {elt.label}
                 </Button>
             ))}
-            <Box marginTop={'auto'}>
+            <Button
+                onClick={() => {
+                    store.set(managerAtom, {})
+                }}
+                color={'error'}
+            >
+                RESET
+            </Button>
+            <ItemsTool></ItemsTool>
+            <Box>
                 Selected tool : {modeSelected}
                 {modeSelected === ETool.ADD_GRID && <GridTool />}
                 {modeSelected === ETool.MAKE_PATH && <PathTool />}
@@ -65,5 +83,36 @@ function PathTool() {
                 Save path
             </Button>
         </>
+    )
+}
+
+function ItemsTool() {
+    const items = useAtomValue(itemsAtom)
+    return (
+        <Box
+            marginTop={'auto'}
+            height={'200px'}
+            overflow={'auto'}
+            width={'100%'}
+        >
+            {items.map((elt) => (
+                <ItemTool id={elt.id} key={elt.id} />
+            ))}
+        </Box>
+    )
+}
+
+function ItemTool(props: { id: string }) {
+    const item = useAtomValue(useMemo(() => itemAtom(props.id), [props.id]))
+    console.log('item', item)
+    if (!item) return
+    return (
+        <Box display={'flex'} alignItems={'center'}>
+            <Checkbox
+                checked={item.selected ?? false}
+                onChange={() => selectItem(props.id)}
+            />
+            {item.type} - {item.id}
+        </Box>
     )
 }
