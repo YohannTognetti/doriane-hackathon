@@ -1,10 +1,10 @@
 import { useAtomValue } from 'jotai'
 import React from 'react'
-import { pathAtom } from '../../store/path-store'
+import { createPathAtom } from '../../store/path-store'
 import { Circle, Line } from 'react-konva'
 
 export default function CurrentPathRender() {
-    const path = useAtomValue(pathAtom)
+    const path = useAtomValue(createPathAtom)
     const flattenedPoints = path.points.flatMap((point) => [point.x, point.y])
 
     return (

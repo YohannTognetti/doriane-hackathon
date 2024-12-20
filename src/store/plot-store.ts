@@ -73,12 +73,16 @@ export const addGrid = ({
     gapX: number
     gapY: number
 }) => {
-    const width = (x2 - x) / col - (col - 1) * gapX
-    const height = (y2 - y) / row - (row - 1) * gapY
+    // Calcul correct de la largeur et de la hauteur des cellules
+    const width = (x2 - x - (col - 1) * gapX) / col
+    const height = (y2 - y - (row - 1) * gapY) / row
+
     for (let i = 0; i < col; i++) {
         for (let j = 0; j < row; j++) {
-            const crtX = x + i * width + gapX * i
-            const crtY = y + j * height + gapY * j
+            // Positionnement correct en tenant compte des gaps
+            const crtX = x + i * (width + gapX)
+            const crtY = y + j * (height + gapY)
+
             addPlot({ x: crtX, y: crtY, x2: crtX + width, y2: crtY + height })
         }
     }

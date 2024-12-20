@@ -21,16 +21,16 @@ export interface IPoint {
     y: number
 }
 
-export const pathAtom = atom<IPath>({ points: [], plotsIntersection: [] })
+export const createPathAtom = atom<IPath>({ points: [], plotsIntersection: [] })
 
 export function addPoint(point: IPoint) {
-    store.set(pathAtom, (oldPath) => ({
+    store.set(createPathAtom, (oldPath) => ({
         ...oldPath,
         points: [...oldPath.points, point],
     }))
 }
 export function savePath() {
-    const path = store.get(pathAtom)
+    const path = store.get(createPathAtom)
     const id = getUniqueId()
     store.set(managerAtom, (old) => ({
         ...old,
@@ -40,7 +40,7 @@ export function savePath() {
             type: 'PATH',
         } satisfies IItem<IPath>,
     }))
-    store.set(pathAtom, { points: [], plotsIntersection: [] })
+    store.set(createPathAtom, { points: [], plotsIntersection: [] })
 }
 
 export function computePlotIntersection(id: string) {

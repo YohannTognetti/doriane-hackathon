@@ -7,6 +7,7 @@ import {
     itemAtom,
     itemsAtom,
     managerAtom,
+    resetAll,
     selectItem,
     store,
     toggleHidden,
@@ -49,7 +50,7 @@ export default function Toolbox() {
             ))}
             <Button
                 onClick={() => {
-                    store.set(managerAtom, {})
+                    resetAll()
                 }}
                 color={'error'}
                 variant="contained"

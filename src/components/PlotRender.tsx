@@ -1,11 +1,12 @@
 import { useAtomValue } from 'jotai'
 import { selectAtom } from 'jotai/utils'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Group, Rect, Text } from 'react-konva'
 import { PlotInfo, selectPlot, ETool, IPlotItem } from '../store/plot-store'
-import { managerAtom } from '../store/global-store'
+import { managerAtom, store } from '../store/global-store'
 
 export function PlotRender(props: { plot: IPlotItem }) {
+    const [isDragging, setIsDragging] = useState(false)
     const plotValue = props.plot.data
     if (!plotValue) return null
     return (
@@ -18,6 +19,20 @@ export function PlotRender(props: { plot: IPlotItem }) {
             width={plotValue.width}
             height={plotValue.height}
             draggable
+            onDragEnd={(event) => {
+                const { x, y } = event.target.position()
+                store.set(managerAtom, (oldItems) => ({
+                    ...oldItems,
+                    [props.plot.id]: {
+                        ...props.plot,
+                        data: {
+                            ...plotValue,
+                            x: x,
+                            y: y,
+                        },
+                    },
+                }))
+            }}
         >
             <Rect
                 width={plotValue.width}

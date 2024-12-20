@@ -2,6 +2,7 @@ import { atom, getDefaultStore } from 'jotai'
 import { IPlotItem, Rectangle } from './plot-store'
 import { selectAtom } from 'jotai/utils'
 import _ from 'lodash'
+import { createPathAtom } from './path-store'
 
 export const store = getDefaultStore()
 
@@ -66,9 +67,10 @@ export function toggleHidden(id: string) {
     })
 }
 
-function resetAll() {
+export function resetAll() {
     store.set(managerAtom, {})
     store.set(idGenerator, 0)
+    store.set(createPathAtom, { plotsIntersection: [], points: [] })
 }
 
 export const removeItem = (id: string) => {

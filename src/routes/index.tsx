@@ -78,20 +78,28 @@ function HomeComponent() {
                                     if (selection === undefined) {
                                         return
                                     }
+                                    //for negative selection
+                                    const selectionCorrectOrder = {
+                                        x: Math.min(selection.x, selection.x2),
+                                        y: Math.min(selection.y, selection.y2),
+                                        x2: Math.max(selection.x, selection.x2),
+                                        y2: Math.max(selection.y, selection.y2),
+                                    }
+
                                     if (mode === 'Add plot') {
                                         addPlot({
-                                            x: selection.x,
-                                            y: selection.y,
-                                            x2: selection.x2,
-                                            y2: selection.y2,
+                                            x: selectionCorrectOrder.x,
+                                            y: selectionCorrectOrder.y,
+                                            x2: selectionCorrectOrder.x2,
+                                            y2: selectionCorrectOrder.y2,
                                         })
                                     } else if (mode === 'Add grid') {
                                         const gridOptions = getAllGridOptions()
                                         addGrid({
-                                            x: selection.x,
-                                            y: selection.y,
-                                            x2: selection.x2,
-                                            y2: selection.y2,
+                                            x: selectionCorrectOrder.x,
+                                            y: selectionCorrectOrder.y,
+                                            x2: selectionCorrectOrder.x2,
+                                            y2: selectionCorrectOrder.y2,
                                             col: gridOptions.nbCol,
                                             gapX: gridOptions.gapX,
                                             gapY: gridOptions.gapY,
@@ -99,10 +107,10 @@ function HomeComponent() {
                                         })
                                     } else if (mode === ETool.NONE) {
                                         setAllPlotIntersectToSelect({
-                                            x: selection.x,
-                                            y: selection.y,
-                                            x2: selection.x2,
-                                            y2: selection.y2,
+                                            x: selectionCorrectOrder.x,
+                                            y: selectionCorrectOrder.y,
+                                            x2: selectionCorrectOrder.x2,
+                                            y2: selectionCorrectOrder.y2,
                                         })
                                     }
                                     setSelectedZone(undefined)
