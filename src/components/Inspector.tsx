@@ -6,24 +6,23 @@ import {
     MenuItem,
     Select,
 } from '@mui/material'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { useAtomValue } from 'jotai'
 import { selectAtom } from 'jotai/utils'
-import { useEffect, useMemo, useState } from 'react'
-import { managerAtom } from '../store/global-store'
-import { IPlotItem, plotField, PlotInfo, removePlotById } from '../store/store'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { IItem, managerAtom } from '../store/global-store'
+import { computePlotIntersection, PathItem } from '../store/path-store'
+import { plotField, PlotInfo, removePlotById } from '../store/store'
 import DataInput from './Input'
-import { computePlotIntersection, pathAtom } from '../store/path-store'
 
 export default function Inspector() {
-    const [displayPlot, setDisplayPlot] = useState<string | null>(null)
-    const selectedPlot = useAtomValue(
+    const [currentItem, setCurrentItem] = useState<string | null>(null)
+    const selectedItems = useAtomValue(
         useMemo(
             () =>
                 selectAtom(managerAtom, (items) =>
                     Object.values(items)
-                        .filter(
-                            (item): item is IPlotItem => item?.type === 'PLOT'
-                        )
+                        .filter((item): item is IItem => item !== undefined)
                         .filter((elt) => elt.selected)
                 ),
             []
@@ -31,16 +30,16 @@ export default function Inspector() {
     )
     useEffect(() => {
         if (
-            selectedPlot.length >= 1 &&
-            (displayPlot === null ||
-                selectedPlot.findIndex((elt) => elt.id === displayPlot) === -1)
+            selectedItems.length >= 1 &&
+            (currentItem === null ||
+                selectedItems.findIndex((elt) => elt.id === currentItem) === -1)
         ) {
-            setDisplayPlot(selectedPlot[0].id)
-        } else if (selectedPlot.length === 0) {
-            setDisplayPlot(null)
+            setCurrentItem(selectedItems[0].id)
+        } else if (selectedItems.length === 0) {
+            setCurrentItem(null)
         }
-    }, [selectedPlot])
-    const item = selectedPlot.find((plot) => plot.id === displayPlot)
+    }, [selectedItems])
+    const item = selectedItems.find((plot) => plot.id === currentItem)
     return (
         <Box
             width="250px"
@@ -55,19 +54,19 @@ export default function Inspector() {
                 <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
-                    value={displayPlot ?? ''}
+                    value={currentItem ?? ''}
                     label="Items"
-                    onChange={(event) => setDisplayPlot(event.target.value)}
+                    onChange={(event) => setCurrentItem(event.target.value)}
                 >
-                    {selectedPlot.map((elt) => (
+                    {selectedItems.map((elt) => (
                         <MenuItem
                             value={elt.id}
-                        >{`${elt.id} - ${elt.data.name ?? '_'}`}</MenuItem>
+                        >{`${elt.type} - ${elt.id} ${elt.data.name ?? ''}`}</MenuItem>
                     ))}
                 </Select>
             </FormControl>
             {item && item.type === 'PLOT' && <PlotInspector plot={item.data} />}
-            <PathInspector />
+            {item && item.type === 'PATH' && <PathInspector path={item} />}
         </Box>
     )
 }
@@ -88,24 +87,69 @@ function PlotInspector({ plot }: { plot: PlotInfo }) {
     )
 }
 
-function PathInspector() {
-    const [plots, setPlots] = useState<string[]>()
-    const path = useAtomValue(pathAtom)
+function PathInspector(props: { path: PathItem }) {
+    const path = props.path.data
+    const plots = path.plotsIntersection
+    const parentRef = useRef<HTMLDivElement>(null)
+    const virtualizer = useVirtualizer({
+        count: plots?.length ?? 0,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 30,
+        enabled: true,
+    })
     return (
-        <Box width="100%" display={'flex'} flexDirection={'column'} gap={'8px'}>
+        <Box
+            width="100%"
+            display={'flex'}
+            flexDirection={'column'}
+            gap={'8px'}
+            overflow={'hidden'}
+        >
             <Box>Path :</Box>
             <Button
-                onClick={() => setPlots(computePlotIntersection())}
+                onClick={() => computePlotIntersection(props.path.id)}
                 color="info"
                 variant="contained"
             >
                 Compute plots
             </Button>
-            {plots?.map((plotId, index) => (
-                <Box key={plotId}>
-                    {index} : Plot - {plotId}
-                </Box>
-            ))}
+            <div
+                ref={parentRef}
+                className="List"
+                style={{
+                    height: 400,
+                    overflowY: 'auto',
+                    contain: 'strict',
+                }}
+            >
+                <div
+                    style={{
+                        height: `${virtualizer.getTotalSize()}px`,
+                        width: '100%',
+                        position: 'relative',
+                        overflow: 'auto',
+                    }}
+                >
+                    {virtualizer.getVirtualItems().map((virtualRow) => {
+                        const plotId = plots?.[virtualRow.index] || ''
+                        return (
+                            <Box
+                                key={plotId}
+                                sx={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: `${virtualRow.size}px`,
+                                    transform: `translateY(${virtualRow.start}px)`,
+                                }}
+                            >
+                                {virtualRow.index} : Plot - {plotId}
+                            </Box>
+                        )
+                    })}
+                </div>
+            </div>
         </Box>
     )
 }

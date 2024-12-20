@@ -10,6 +10,7 @@ export interface IItem<T = any> {
     type: 'PLOT' | 'PATH'
     data: T
     selected?: boolean
+    hidden?: boolean
 }
 export const managerAtom = atom<Record<string, IItem | undefined>>({})
 export const idGenerator = atom<number>(0)
@@ -52,6 +53,15 @@ export function selectItem(id: string) {
         return {
             ...items,
             [id]: { ...items[id], selected: !items[id]!.selected },
+        }
+    })
+}
+export function toggleHidden(id: string) {
+    store.set(managerAtom, (items) => {
+        if (!items[id]) return items
+        return {
+            ...items,
+            [id]: { ...items[id], hidden: !items[id]!.hidden },
         }
     })
 }

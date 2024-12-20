@@ -43,8 +43,9 @@ export function savePath() {
     store.set(pathAtom, { points: [], plotsIntersection: [] })
 }
 
-export function computePlotIntersection() {
-    const path = store.get(pathAtom)
+export function computePlotIntersection(id: string) {
+    const path = store.get(managerAtom)[id] as PathItem
+    if (!path) return
     const items = store.get(managerAtom)
     const plotItems = Object.values(items).filter(
         (elt): elt is IPlotItem => elt?.type === 'PLOT'
@@ -65,10 +66,25 @@ export function computePlotIntersection() {
             }) satisfies IPolygon
     )
     const plotIntersect = listIntersectedPolygonsWithOrder(
-        path,
+        path.data,
         plotItemsToPoints
     )
-    console.log('plotIntersect', plotIntersect)
+    store.set(managerAtom, (items) => {
+        const item = items[id] as PathItem
+        if (!item) return items
+        return {
+            ...items,
+            [id]: {
+                ...item,
+                data: {
+                    ...item.data,
+                    plotsIntersection: plotIntersect.map(
+                        (elt) => elt.polygonId
+                    ),
+                } satisfies IPath,
+            },
+        }
+    })
     return plotIntersect.map((elt) => elt.polygonId)
 }
 

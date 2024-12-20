@@ -850,6 +850,13 @@
     "@tanstack/store" "0.6.0"
     use-sync-external-store "^1.2.2"
 
+"@tanstack/react-virtual@^3.11.2":
+  version "3.11.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-virtual/-/react-virtual-3.11.2.tgz#d6b9bd999c181f0a2edce270c87a2febead04322"
+  integrity sha512-OuFzMXPF4+xZgx8UzJha0AieuMihhhaWG0tCqpp6tDzlFwOmNBPYMuLOtMJ1Tr4pXLHmgjcWhG6RlknY2oNTdQ==
+  dependencies:
+    "@tanstack/virtual-core" "3.11.2"
+
 "@tanstack/router-devtools@^1.91.3":
   version "1.91.3"
   resolved "https://registry.yarnpkg.com/@tanstack/router-devtools/-/router-devtools-1.91.3.tgz#b869c9817d9d39e37ef29dab3c10a6fc2657b7c9"
@@ -896,6 +903,11 @@
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/@tanstack/store/-/store-0.6.0.tgz#f73d711c6e53f2f91c0f0af0771583095d449f67"
   integrity sha512-+m2OBglsjXcLmmKOX6/9v8BDOCtyxhMmZLsRUDswOOSdIIR9mvv6i0XNKsmTh3AlYU8c1mRcodC8/Vyf+69VlQ==
+
+"@tanstack/virtual-core@3.11.2":
+  version "3.11.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/virtual-core/-/virtual-core-3.11.2.tgz#00409e743ac4eea9afe5b7708594d5fcebb00212"
+  integrity sha512-vTtpNt7mKCiZ1pwU9hfKPhpdVO2sVzFQsxoVBGtOSHxlrRRzYr8iQ2TlwbAcRYCcEiZ9ECAM8kBzH0v2+VzfKw==
 
 "@tanstack/virtual-file-routes@^1.87.6":
   version "1.87.6"

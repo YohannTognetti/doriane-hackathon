@@ -3,8 +3,8 @@ import { store } from './global-store'
 
 export const gridNbRowAtom = atom('3')
 export const gridNbColAtom = atom('3')
-export const gridGapXAtom = atom('5')
-export const gridGapYAtom = atom('5')
+export const gridGapXAtom = atom('0')
+export const gridGapYAtom = atom('0')
 
 export const getAllGridOptions = () => {
     return {

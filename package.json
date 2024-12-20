@@ -26,6 +26,7 @@
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^6.2.1",
     "@tanstack/react-router": "^1.91.3",
+    "@tanstack/react-virtual": "^3.11.2",
     "@tanstack/router-devtools": "^1.91.3",
     "immer": "^10.1.1",
     "jotai": "^2.10.4",

@@ -44,6 +44,6 @@ export default function DataAllPlotRender(props: { plotId: string }) {
             [props.plotId]
         )
     )
-    if (!value) return
+    if (!value || value.hidden) return
     return <PlotRender plot={value} />
 }
