@@ -6,10 +6,10 @@ import _ from 'lodash'
 import { IPlotItem } from '../store/plot-store'
 
 export default function Debug() {
-    const manager = useAtomValue(managerAtom)
+    // const manager = useAtomValue(managerAtom)
     // const plot = useAtomValue(plotIdsAtom)
 
-    console.log('Debug manager', manager)
+    // console.log('Debug manager', manager)
     // console.log('Debug plot', plot)
 
     return <></>

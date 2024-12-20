@@ -6,7 +6,6 @@ import { PlotInfo, ETool, IPlotItem } from '../store/plot-store'
 import { managerAtom, selectItem, store } from '../store/global-store'
 
 export function PlotRender(props: { plot: IPlotItem }) {
-    const [isDragging, setIsDragging] = useState(false)
     const plotValue = props.plot.data
     if (!plotValue) return null
     return (
