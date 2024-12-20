@@ -23,7 +23,7 @@ function RootComponent() {
             </div>
             <hr />
             <Outlet />
-            <TanStackRouterDevtools position="bottom-right" />
+            {/* <TanStackRouterDevtools position="bottom-right" /> */}
         </Box>
     )
 }

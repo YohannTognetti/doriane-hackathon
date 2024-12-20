@@ -70,3 +70,11 @@ function resetAll() {
     store.set(managerAtom, {})
     store.set(idGenerator, 0)
 }
+
+export const removeItem = (id: string) => {
+    store.set(managerAtom, (items) => {
+        const newItems = { ...items }
+        delete newItems[id]
+        return newItems
+    })
+}

@@ -10,9 +10,9 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { useAtomValue } from 'jotai'
 import { selectAtom } from 'jotai/utils'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { IItem, managerAtom } from '../store/global-store'
+import { IItem, managerAtom, removeItem } from '../store/global-store'
 import { computePlotIntersection, PathItem } from '../store/path-store'
-import { plotField, PlotInfo, removePlotById } from '../store/plot-store'
+import { plotField, PlotInfo } from '../store/plot-store'
 import DataInput from './Input'
 
 export default function Inspector() {
@@ -77,7 +77,7 @@ function PlotInspector({ plot }: { plot: PlotInfo }) {
             <Box>id : {plot.id}</Box>
             <DataInput label="name" atom={plotField(plot.id, 'name')} />
             <Button
-                onClick={() => removePlotById(plot.id)}
+                onClick={() => removeItem(plot.id)}
                 color="warning"
                 variant="contained"
             >
@@ -106,6 +106,13 @@ function PathInspector(props: { path: PathItem }) {
             overflow={'hidden'}
         >
             <Box>Path :</Box>
+            <Button
+                onClick={() => removeItem(props.path.id)}
+                color="error"
+                variant="contained"
+            >
+                Delete path
+            </Button>
             <Button
                 onClick={() => computePlotIntersection(props.path.id)}
                 color="info"

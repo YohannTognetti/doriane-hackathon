@@ -96,13 +96,6 @@ export const selectPlot = (id: string) => {
     )
 }
 
-export const removePlotById = (plotId: string) => {
-    store.set(managerAtom, (items) => {
-        const newItems = { ...items }
-        delete newItems[plotId]
-        return newItems
-    })
-}
 export const setAllPlotIntersectToSelect = (selection: Rectangle) => {
     store.set(
         managerAtom,

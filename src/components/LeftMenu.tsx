@@ -52,6 +52,8 @@ export default function Toolbox() {
                     store.set(managerAtom, {})
                 }}
                 color={'error'}
+                variant="contained"
+                sx={{ position: 'absolute', right: 0, bottom: 0 }}
             >
                 RESET
             </Button>
