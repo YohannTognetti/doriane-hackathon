@@ -21,7 +21,7 @@ export function getUniqueId() {
 }
 
 export const selectZoneAtom = atom<Rectangle | undefined>(undefined)
-
+export const selectedInspectorAtom = atom<string | null>(null)
 export const itemsAtom = selectAtom(managerAtom, (items) => {
     return Object.values(items)
         .filter((elt): elt is IItem => elt !== undefined)
@@ -56,6 +56,7 @@ export function selectItem(id: string) {
             [id]: { ...items[id], selected: !items[id]!.selected },
         }
     })
+    store.set(selectedInspectorAtom, id)
 }
 export function toggleHidden(id: string) {
     store.set(managerAtom, (items) => {

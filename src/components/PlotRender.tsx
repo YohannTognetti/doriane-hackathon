@@ -2,8 +2,8 @@ import { useAtomValue } from 'jotai'
 import { selectAtom } from 'jotai/utils'
 import { useMemo, useState } from 'react'
 import { Group, Rect, Text } from 'react-konva'
-import { PlotInfo, selectPlot, ETool, IPlotItem } from '../store/plot-store'
-import { managerAtom, store } from '../store/global-store'
+import { PlotInfo, ETool, IPlotItem } from '../store/plot-store'
+import { managerAtom, selectItem, store } from '../store/global-store'
 
 export function PlotRender(props: { plot: IPlotItem }) {
     const [isDragging, setIsDragging] = useState(false)
@@ -14,7 +14,7 @@ export function PlotRender(props: { plot: IPlotItem }) {
             x={plotValue.x}
             y={plotValue.y}
             onClick={() => {
-                selectPlot(plotValue.id)
+                selectItem(plotValue.id)
             }}
             width={plotValue.width}
             height={plotValue.height}

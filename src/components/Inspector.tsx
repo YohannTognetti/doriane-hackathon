@@ -7,16 +7,21 @@ import {
     Select,
 } from '@mui/material'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { useAtomValue } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { selectAtom } from 'jotai/utils'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { IItem, managerAtom, removeItem } from '../store/global-store'
+import {
+    IItem,
+    managerAtom,
+    removeItem,
+    selectedInspectorAtom,
+} from '../store/global-store'
 import { computePlotIntersection, PathItem } from '../store/path-store'
 import { plotField, PlotInfo } from '../store/plot-store'
 import DataInput from './Input'
 
 export default function Inspector() {
-    const [currentItem, setCurrentItem] = useState<string | null>(null)
+    const [currentItem, setCurrentItem] = useAtom(selectedInspectorAtom)
     const selectedItems = useAtomValue(
         useMemo(
             () =>
@@ -28,18 +33,16 @@ export default function Inspector() {
             []
         )
     )
+
+    const itemFound = selectedItems.find((plot) => plot.id === currentItem)
+    const item = itemFound ?? selectedItems?.[0]
     useEffect(() => {
-        if (
-            selectedItems.length >= 1 &&
-            (currentItem === null ||
-                selectedItems.findIndex((elt) => elt.id === currentItem) === -1)
-        ) {
-            setCurrentItem(selectedItems[0].id)
-        } else if (selectedItems.length === 0) {
+        if (!item) {
             setCurrentItem(null)
+        } else if (itemFound === undefined) {
+            setCurrentItem(item.id)
         }
-    }, [selectedItems])
-    const item = selectedItems.find((plot) => plot.id === currentItem)
+    }, [selectedItems.length])
     return (
         <Box
             width="250px"

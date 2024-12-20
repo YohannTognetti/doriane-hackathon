@@ -1,7 +1,13 @@
 import { atom, getDefaultStore } from 'jotai'
 import { current, produce } from 'immer'
 import { PrimitiveAtom } from 'jotai'
-import { getUniqueId, store, IItem, managerAtom } from './global-store'
+import {
+    getUniqueId,
+    store,
+    IItem,
+    managerAtom,
+    selectedInspectorAtom,
+} from './global-store'
 export interface Rectangle {
     x: number
     y: number
@@ -89,18 +95,6 @@ export const addGrid = ({
             addPlot({ x: crtX, y: crtY, x2: crtX + width, y2: crtY + height })
         }
     }
-}
-export const selectPlot = (id: string) => {
-    store.set(
-        managerAtom,
-        produce((items) => {
-            const item = items[id]
-            if (!item || item.type !== 'PLOT') {
-                return
-            }
-            item.selected = !item.selected
-        })
-    )
 }
 
 export const setAllPlotIntersectToSelect = (selection: Rectangle) => {
