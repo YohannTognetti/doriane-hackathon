@@ -3,19 +3,20 @@ import React, { useMemo } from 'react'
 import { Circle, Line } from 'react-konva'
 import { managerAtom } from '../../store/global-store'
 import { selectAtom } from 'jotai/utils'
-import { IPath } from '../../store/path-store'
+import { IPath, PathItem } from '../../store/path-store'
 
 export default function CurrentPathRender(props: { id: string }) {
-    const path = useAtomValue(
+    const pathItem = useAtomValue(
         useMemo(
             () =>
-                selectAtom(
-                    managerAtom,
-                    (items) => items[props.id]?.data as IPath
-                ),
+                selectAtom(managerAtom, (items) => items[props.id] as PathItem),
             [props.id]
         )
     )
+    if (!pathItem || pathItem.hidden) {
+        return
+    }
+    const path = pathItem.data
     // Transforme la liste d'IPoint en un tableau de nombres pour Konva
     const flattenedPoints = path.points.flatMap((point) => [point.x, point.y])
 

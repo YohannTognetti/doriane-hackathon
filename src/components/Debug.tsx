@@ -3,7 +3,7 @@ import React from 'react'
 import { IItem, managerAtom, plotIdsAtom } from '../store/global-store'
 import { selectAtom } from 'jotai/utils'
 import _ from 'lodash'
-import { IPlotItem } from '../store/store'
+import { IPlotItem } from '../store/plot-store'
 
 export default function Debug() {
     const manager = useAtomValue(managerAtom)

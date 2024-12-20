@@ -1,15 +1,8 @@
-import { Button, Checkbox, Input, TextField } from '@mui/material'
+import { Button, Checkbox, IconButton } from '@mui/material'
 import Box from '@mui/material/Box'
-import { useAtom, useAtomValue } from 'jotai'
-import { ETool, modeSelectedAtom, selectTool } from '../store/store'
-import DataInput from './Input'
-import {
-    gridGapXAtom,
-    gridGapYAtom,
-    gridNbColAtom,
-    gridNbRowAtom,
-} from '../store/grid-store'
-import { savePath } from '../store/path-store'
+import { useVirtualizer } from '@tanstack/react-virtual'
+import { useAtomValue } from 'jotai'
+import { useMemo, useRef } from 'react'
 import {
     itemAtom,
     itemsAtom,
@@ -18,8 +11,17 @@ import {
     store,
     toggleHidden,
 } from '../store/global-store'
-import { useMemo, useRef } from 'react'
-import { useVirtualizer } from '@tanstack/react-virtual'
+import {
+    gridGapXAtom,
+    gridGapYAtom,
+    gridNbColAtom,
+    gridNbRowAtom,
+} from '../store/grid-store'
+import { savePath } from '../store/path-store'
+import { ETool, modeSelectedAtom, selectTool } from '../store/plot-store'
+import DataInput from './Input'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import VisibilityIcon from '@mui/icons-material/Visibility'
 
 export default function Toolbox() {
     const modeSelected = useAtomValue(modeSelectedAtom)
@@ -154,11 +156,9 @@ function ItemTool(props: { id: string }) {
                 onChange={() => selectItem(props.id)}
             />
             {item.type} - {item.id}
-            <Checkbox
-                checked={item.hidden ?? false}
-                onChange={() => toggleHidden(props.id)}
-                color="secondary"
-            />
+            <IconButton onClick={() => toggleHidden(props.id)}>
+                {item.hidden ? <VisibilityOffIcon /> : <VisibilityIcon />}
+            </IconButton>
         </Box>
     )
 }

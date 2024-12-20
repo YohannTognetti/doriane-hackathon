@@ -2,7 +2,7 @@ import { useAtomValue } from 'jotai'
 import { selectAtom } from 'jotai/utils'
 import { useMemo } from 'react'
 import { Group, Rect, Text } from 'react-konva'
-import { PlotInfo, selectPlot, ETool, IPlotItem } from '../store/store'
+import { PlotInfo, selectPlot, ETool, IPlotItem } from '../store/plot-store'
 import { managerAtom } from '../store/global-store'
 
 export function PlotRender(props: { plot: IPlotItem }) {

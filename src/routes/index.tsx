@@ -18,7 +18,7 @@ import {
     ETool,
     modeSelectedAtom,
     setAllPlotIntersectToSelect,
-} from '../store/store'
+} from '../store/plot-store'
 import LayerRenderer from '../components/LayerRenderer'
 
 export const Route = createFileRoute('/')({

@@ -1,5 +1,5 @@
 import { atom, getDefaultStore } from 'jotai'
-import { IPlotItem, Rectangle } from './store'
+import { IPlotItem, Rectangle } from './plot-store'
 import { selectAtom } from 'jotai/utils'
 import _ from 'lodash'
 
@@ -64,4 +64,9 @@ export function toggleHidden(id: string) {
             [id]: { ...items[id], hidden: !items[id]!.hidden },
         }
     })
+}
+
+function resetAll() {
+    store.set(managerAtom, {})
+    store.set(idGenerator, 0)
 }

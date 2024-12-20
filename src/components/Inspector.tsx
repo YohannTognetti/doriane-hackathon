@@ -12,7 +12,7 @@ import { selectAtom } from 'jotai/utils'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { IItem, managerAtom } from '../store/global-store'
 import { computePlotIntersection, PathItem } from '../store/path-store'
-import { plotField, PlotInfo, removePlotById } from '../store/store'
+import { plotField, PlotInfo, removePlotById } from '../store/plot-store'
 import DataInput from './Input'
 
 export default function Inspector() {

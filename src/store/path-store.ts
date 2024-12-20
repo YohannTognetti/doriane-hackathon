@@ -1,6 +1,6 @@
 import { atom } from 'jotai'
 import { getUniqueId, IItem, managerAtom, store } from './global-store'
-import { IPlotItem } from './store'
+import { IPlotItem } from './plot-store'
 export interface IPolygon {
     id: string
     points: IPoint[]
