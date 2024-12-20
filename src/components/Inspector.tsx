@@ -76,6 +76,13 @@ function PlotInspector({ plot }: { plot: PlotInfo }) {
         <Box width="100%" display={'flex'} flexDirection={'column'} gap={'8px'}>
             <Box>id : {plot.id}</Box>
             <DataInput label="name" atom={plotField(plot.id, 'name')} />
+            <DataInput label="location" atom={plotField(plot.id, 'location')} />
+            <DataInput label="genotype" atom={plotField(plot.id, 'genotype')} />
+            <DataInput
+                label="replication"
+                atom={plotField(plot.id, 'replication')}
+            />
+
             <Button
                 onClick={() => removeItem(plot.id)}
                 color="warning"

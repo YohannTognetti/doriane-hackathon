@@ -16,6 +16,9 @@ export interface PlotInfo {
     height: number
     id: string
     name?: string
+    replication?: string
+    genotype?: string
+    location?: string
 }
 export interface IPlotItem extends IItem<PlotInfo> {}
 
@@ -161,7 +164,10 @@ export const plotAtom = (plotId: string) =>
             )
         }
     )
-export const plotField = (plotId: string, plotField: 'name') =>
+export const plotField = (
+    plotId: string,
+    plotField: 'name' | 'location' | 'genotype' | 'replication'
+) =>
     atom(
         (get) => get(plotAtom(plotId))?.data[plotField] ?? '',
         (get, set, newValue: string) => {
