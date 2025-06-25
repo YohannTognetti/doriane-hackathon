@@ -6,3 +6,10 @@
     width: 100%;
     height: 100%;
 }
+
+.leaflet-tooltip.no-bg-tooltip {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-weight: bold; /* optionnel */
+}

@@ -68,13 +68,13 @@ export default function Toolbox() {
     )
 }
 
-function GridTool() {
+export function GridTool() {
     return (
         <>
             <DataInput atom={gridNbColAtom} label="nb Col" type="number" />
             <DataInput atom={gridNbRowAtom} label="nb Row" type="number" />
-            <DataInput atom={gridGapXAtom} label="gap X" type="number" />
-            <DataInput atom={gridGapYAtom} label="gap Y" type="number" />
+            <DataInput atom={gridGapXAtom} label="space X" type="number" />
+            <DataInput atom={gridGapYAtom} label="space Y" type="number" />
         </>
     )
 }
@@ -93,7 +93,7 @@ function PathTool() {
     )
 }
 
-function ItemsTool() {
+export function ItemsTool() {
     const items = useAtomValue(itemsAtom)
     const parentRef = useRef<HTMLDivElement>(null)
     const virtualizer = useVirtualizer({
@@ -158,7 +158,7 @@ function ItemTool(props: { id: string }) {
                 checked={item.selected ?? false}
                 onChange={() => selectItem(props.id)}
             />
-            {item.type} - {item.id}
+            {item.type} - {item.data.name ?? item.id}
             <IconButton onClick={() => toggleHidden(props.id)}>
                 {item.hidden ? <VisibilityOffIcon /> : <VisibilityIcon />}
             </IconButton>

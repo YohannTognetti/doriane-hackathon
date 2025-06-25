@@ -8,6 +8,7 @@ import {
     managerAtom,
     selectedInspectorAtom,
 } from './global-store'
+import { Polygon } from 'geojson'
 export interface Rectangle {
     x: number
     y: number
@@ -16,10 +17,6 @@ export interface Rectangle {
 }
 
 export interface PlotInfo {
-    x: number
-    y: number
-    width: number
-    height: number
     id: string
     name?: string
     replication?: string
@@ -30,20 +27,7 @@ export interface IPlotItem extends IItem<PlotInfo> {}
 
 export const isDrag = atom<boolean>()
 
-export const addPlot = ({
-    x,
-    y,
-    x2,
-    y2,
-}: {
-    x: number
-    y: number
-    x2: number
-    y2: number
-}) => {
-    if (Math.abs(x2 - x) < 2 || Math.abs(y2 - y) < 2) {
-        return
-    }
+export const addPlot = (polygon: Polygon) => {
     const id = getUniqueId()
     store.set(managerAtom, (item) => {
         return {
@@ -51,78 +35,79 @@ export const addPlot = ({
             [id]: {
                 id: id,
                 data: {
-                    x: x,
-                    y: y,
-                    width: x2 - x,
-                    height: y2 - y,
                     id: id.toString(),
                 },
                 type: 'PLOT',
+                geo: {
+                    type: 'Feature',
+                    properties: {},
+                    geometry: polygon,
+                },
             },
         }
     })
 }
 
-export const addGrid = ({
-    x,
-    y,
-    x2,
-    y2,
-    col,
-    row,
-    gapX,
-    gapY,
-}: {
-    x: number
-    y: number
-    x2: number
-    y2: number
-    col: number
-    row: number
-    gapX: number
-    gapY: number
-}) => {
-    // Calcul correct de la largeur et de la hauteur des cellules
-    const width = (x2 - x - (col - 1) * gapX) / col
-    const height = (y2 - y - (row - 1) * gapY) / row
+// export const addGrid = ({
+//     x,
+//     y,
+//     x2,
+//     y2,
+//     col,
+//     row,
+//     gapX,
+//     gapY,
+// }: {
+//     x: number
+//     y: number
+//     x2: number
+//     y2: number
+//     col: number
+//     row: number
+//     gapX: number
+//     gapY: number
+// }) => {
+//     // Calcul correct de la largeur et de la hauteur des cellules
+//     const width = (x2 - x - (col - 1) * gapX) / col
+//     const height = (y2 - y - (row - 1) * gapY) / row
 
-    for (let i = 0; i < col; i++) {
-        for (let j = 0; j < row; j++) {
-            // Positionnement correct en tenant compte des gaps
-            const crtX = x + i * (width + gapX)
-            const crtY = y + j * (height + gapY)
+//     for (let i = 0; i < col; i++) {
+//         for (let j = 0; j < row; j++) {
+//             // Positionnement correct en tenant compte des gaps
+//             const crtX = x + i * (width + gapX)
+//             const crtY = y + j * (height + gapY)
 
-            addPlot({ x: crtX, y: crtY, x2: crtX + width, y2: crtY + height })
-        }
-    }
-}
+//             addPlot({ x: crtX, y: crtY, x2: crtX + width, y2: crtY + height })
+//         }
+//     }
+// }
 
-export const setAllPlotIntersectToSelect = (selection: Rectangle) => {
-    store.set(
-        managerAtom,
-        produce((items) => {
-            Object.values(items)
-                .filter((item): item is IPlotItem => {
-                    return item?.type === 'PLOT'
-                })
-                .forEach((item) => {
-                    if (item.selected) {
-                        item.selected = false
-                    }
-                    if (
-                        isIntersect(selection, {
-                            x: item.data.x,
-                            y: item.data.y,
-                            x2: item.data.x + item.data.width,
-                            y2: item.data.y + item.data.height,
-                        })
-                    ) {
-                        item.selected = true
-                    }
-                })
-        })
-    )
-}
+// export const setAllPlotIntersectToSelect = (selection: Rectangle) => {
+//     store.set(
+//         managerAtom,
+//         produce((items) => {
+//             Object.values(items)
+//                 .filter((item): item is IPlotItem => {
+//                     return item?.type === 'PLOT'
+//                 })
+//                 .forEach((item) => {
+//                     if (item.selected) {
+//                         item.selected = false
+//                     }
+//                     if (
+//                         isIntersect(selection, {
+//                             x: item.data.x,
+//                             y: item.data.y,
+//                             x2: item.data.x + item.data.width,
+//                             y2: item.data.y + item.data.height,
+//                         })
+//                     ) {
+//                         item.selected = true
+//                     }
+//                 })
+//         })
+//     )
+// }
 export function isIntersect(selection: Rectangle, item: Rectangle): boolean {
     const { x: sx, x2: sx2, y: sy, y2: sy2 } = selection
     const { x, x2, y, y2 } = item

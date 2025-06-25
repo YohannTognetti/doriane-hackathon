@@ -16,9 +16,10 @@ import {
     removeItem,
     selectedInspectorAtom,
 } from '../store/global-store'
-import { computePlotIntersection, PathItem } from '../store/path-store'
+import { PathItem } from '../store/path-store'
 import { plotField, PlotInfo } from '../store/plot-store'
 import DataInput from './Input'
+import { GridTool } from './LeftMenu'
 
 export default function Inspector() {
     const [currentItem, setCurrentItem] = useAtom(selectedInspectorAtom)
@@ -45,7 +46,7 @@ export default function Inspector() {
     }, [selectedItems.length])
     return (
         <Box
-            width="250px"
+            width="100%"
             height={'100%'}
             display={'flex'}
             flexDirection={'column'}
@@ -70,6 +71,14 @@ export default function Inspector() {
             </FormControl>
             {item && item.type === 'PLOT' && <PlotInspector plot={item.data} />}
             {item && item.type === 'PATH' && <PathInspector path={item} />}
+            <Button
+                onClick={() => removeItem(item.id)}
+                color="warning"
+                variant="contained"
+            >
+                Remove item
+            </Button>
+            <GridTool />
         </Box>
     )
 }
@@ -85,14 +94,6 @@ function PlotInspector({ plot }: { plot: PlotInfo }) {
                 label="replication"
                 atom={plotField(plot.id, 'replication')}
             />
-
-            <Button
-                onClick={() => removeItem(plot.id)}
-                color="warning"
-                variant="contained"
-            >
-                Remove plot
-            </Button>
         </Box>
     )
 }
@@ -124,7 +125,7 @@ function PathInspector(props: { path: PathItem }) {
                 Delete path
             </Button>
             <Button
-                onClick={() => computePlotIntersection(props.path.id)}
+                // onClick={() => computePlotIntersection(props.path.id)}
                 color="info"
                 variant="contained"
             >

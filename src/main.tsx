@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 import './main.css'
+//Import for leaflet and Geoman
+import '@geoman-io/leaflet-geoman-free'
+import 'leaflet/dist/leaflet.css'
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 // Set up a Router instance
 const router = createRouter({
     routeTree,

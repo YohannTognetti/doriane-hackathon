@@ -38,55 +38,63 @@ export function savePath() {
             id: id,
             data: path,
             type: 'PATH',
+            geo: {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                    type: 'LineString',
+                    coordinates: path.points.map((p) => [p.x, p.y]),
+                },
+            },
         } satisfies IItem<IPath>,
     }))
     store.set(createPathAtom, { points: [], plotsIntersection: [] })
 }
 
-export function computePlotIntersection(id: string) {
-    const path = store.get(managerAtom)[id] as PathItem
-    if (!path) return
-    const items = store.get(managerAtom)
-    const plotItems = Object.values(items).filter(
-        (elt): elt is IPlotItem => elt?.type === 'PLOT'
-    )
-    const plotItemsToPoints = plotItems.map(
-        (item) =>
-            ({
-                ...item,
-                points: [
-                    { x: item.data.x, y: item.data.y },
-                    { x: item.data.x + item.data.width, y: item.data.y },
-                    {
-                        x: item.data.x + item.data.width,
-                        y: item.data.y + item.data.height,
-                    },
-                    { x: item.data.x, y: item.data.y + item.data.height },
-                ] satisfies IPoint[],
-            }) satisfies IPolygon
-    )
-    const plotIntersect = listIntersectedPolygonsWithOrder(
-        path.data,
-        plotItemsToPoints
-    )
-    store.set(managerAtom, (items) => {
-        const item = items[id] as PathItem
-        if (!item) return items
-        return {
-            ...items,
-            [id]: {
-                ...item,
-                data: {
-                    ...item.data,
-                    plotsIntersection: plotIntersect.map(
-                        (elt) => elt.polygonId
-                    ),
-                } satisfies IPath,
-            },
-        }
-    })
-    return plotIntersect.map((elt) => elt.polygonId)
-}
+// export function computePlotIntersection(id: string) {
+//     const path = store.get(managerAtom)[id] as PathItem
+//     if (!path) return
+//     const items = store.get(managerAtom)
+//     const plotItems = Object.values(items).filter(
+//         (elt): elt is IPlotItem => elt?.type === 'PLOT'
+//     )
+//     const plotItemsToPoints = plotItems.map(
+//         (item) =>
+//             ({
+//                 ...item,
+//                 points: [
+//                     { x: item.data.x, y: item.data.y },
+//                     { x: item.data.x + item.data.width, y: item.data.y },
+//                     {
+//                         x: item.data.x + item.data.width,
+//                         y: item.data.y + item.data.height,
+//                     },
+//                     { x: item.data.x, y: item.data.y + item.data.height },
+//                 ] satisfies IPoint[],
+//             }) satisfies IPolygon
+//     )
+//     const plotIntersect = listIntersectedPolygonsWithOrder(
+//         path.data,
+//         plotItemsToPoints
+//     )
+//     store.set(managerAtom, (items) => {
+//         const item = items[id] as PathItem
+//         if (!item) return items
+//         return {
+//             ...items,
+//             [id]: {
+//                 ...item,
+//                 data: {
+//                     ...item.data,
+//                     plotsIntersection: plotIntersect.map(
+//                         (elt) => elt.polygonId
+//                     ),
+//                 } satisfies IPath,
+//             },
+//         }
+//     })
+//     return plotIntersect.map((elt) => elt.polygonId)
+// }
 
 /**
  * Vérifie si deux segments se croisent.
