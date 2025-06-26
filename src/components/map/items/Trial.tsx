@@ -29,6 +29,15 @@ export default function Trial(props: { id: string }) {
                 },
             }}
             key={colors}
-        ></Polygon>
+        >
+            <Tooltip
+                permanent
+                direction="center"
+                className="no-bg-tooltip"
+                pane="textPane"
+            >
+                {value.name ?? value.id}
+            </Tooltip>
+        </Polygon>
     )
 }

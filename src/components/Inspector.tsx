@@ -51,7 +51,7 @@ export default function Inspector() {
     )
 
     const itemFound = selectedItems.find((plot) => plot.id === currentItem)
-    const item = itemFound ?? selectedItems?.[0]
+    const item: IItem | null = itemFound ?? selectedItems?.[0] ?? null
     useEffect(() => {
         if (!item) {
             setCurrentItem(null)
@@ -86,6 +86,20 @@ export default function Inspector() {
     }, [item, allItems])
     const asPlotCollision =
         collision.filter((elt) => elt.type === 'PLOT').length === 0
+    if (!item) {
+        return (
+            <Box
+                width="100%"
+                height={'100%'}
+                display={'flex'}
+                flexDirection={'column'}
+                paddingX={'8px'}
+                padding={'8px'}
+                gap={'16px'}
+                overflow={'auto'}
+            ></Box>
+        )
+    }
     return (
         <Box
             width="100%"
@@ -96,7 +110,7 @@ export default function Inspector() {
             padding={'8px'}
             gap={'16px'}
             overflow={'auto'}
-            key={item.id}
+            key={item?.id ?? 'generic'}
         >
             <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Items</InputLabel>
@@ -115,14 +129,19 @@ export default function Inspector() {
                     ))}
                 </Select>
             </FormControl>
-            <BasicInspector item={item} colision={collision} />
             {item && item.type === 'PLOT' && <PlotInspector plot={item.data} />}
             {item && item.type === 'FIELD' && asPlotCollision && (
                 <FieldInspector item={item} />
             )}
 
             {item && item.type === 'PATH' && <PathInspector path={item} />}
-            {item && item.type === 'TRIAL' && <TrialInspector item={item} />}
+            <BasicInspector item={item} colision={collision} />
+            {item && item.type === 'TRIAL' && (
+                <DataInput
+                    label="Species"
+                    atom={itemFieldEditAtom(item.id, 'species')}
+                />
+            )}
             <Button
                 onClick={() => removeItem(item.id)}
                 color="warning"

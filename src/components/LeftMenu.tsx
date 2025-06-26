@@ -2,11 +2,12 @@ import { Button, Checkbox, IconButton } from '@mui/material'
 import Box from '@mui/material/Box'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useAtomValue } from 'jotai'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import {
     itemAtom,
     itemsAtom,
     itemsFilteredAtom,
+    ItemType,
     managerAtom,
     resetAll,
     searchAtom,
@@ -26,6 +27,7 @@ import { ETool, modeSelectedAtom, selectTool } from '../store/plot-store'
 import DataInput from './Input'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import VisibilityIcon from '@mui/icons-material/Visibility'
+import { produce } from 'immer'
 
 export default function Toolbox() {
     const modeSelected = useAtomValue(modeSelectedAtom)
@@ -100,8 +102,32 @@ export function ItemsTool() {
         estimateSize: () => 30,
         enabled: true,
     })
+    useEffect(() => {
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].selected) {
+                virtualizer.scrollToIndex(i, {
+                    align: 'auto',
+                    behavior: 'smooth',
+                })
+                return
+            }
+        }
+    }, [items])
     return (
         <>
+            <Box
+                display={'flex'}
+                flexDirection={'column'}
+                gap={1}
+                maxHeight={'130px'}
+                overflow={'auto'}
+            >
+                <ShowHideByType type="PLOT" />
+                <ShowHideByType type="TRIAL" />
+                <ShowHideByType type="FIELD" />
+                <ShowHideByType type="SENSOR" />
+                <ShowHideByType type="STATION" />
+            </Box>
             <DataInput
                 atom={searchAtom}
                 label="Search"
@@ -146,6 +172,49 @@ export function ItemsTool() {
                 </div>
             </Box>
         </>
+    )
+}
+function ShowHideByType(props: { type: ItemType }) {
+    return (
+        <Box display={'flex'} alignItems={'center'}>
+            <div>{props.type}:</div>
+            <IconButton
+                onClick={() => {
+                    store.set(
+                        managerAtom,
+                        produce((items) => {
+                            Object.values(items).forEach((item) => {
+                                if (!item) return
+                                if (item.type === props.type) {
+                                    item.hidden = true
+                                }
+                            })
+                            return items
+                        })
+                    )
+                }}
+            >
+                <VisibilityOffIcon />
+            </IconButton>
+            <IconButton
+                onClick={() => {
+                    store.set(
+                        managerAtom,
+                        produce((items) => {
+                            Object.values(items).forEach((item) => {
+                                if (!item) return
+                                if (item.type === props.type) {
+                                    item.hidden = false
+                                }
+                            })
+                            return items
+                        })
+                    )
+                }}
+            >
+                <VisibilityIcon />
+            </IconButton>
+        </Box>
     )
 }
 

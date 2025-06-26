@@ -9,7 +9,7 @@ function RootComponent() {
     return (
         <Box display={'flex'} className="full-size" flexDirection={'column'}>
             <div className="p-2 flex gap-2 text-lg">
-                <img src="/logo.svg" alt="Logo" />
+                <img src="/logo.svg" alt="Logo" style={{ height: '50px' }} />
             </div>
             <hr />
             <Outlet />

@@ -26,7 +26,6 @@ const componentsMap: Record<
 }
 export default function BloomeoLayer() {
     const values = useAtomValue(itemsAtom)
-    console.log(store.get(managerAtom))
     return (
         <LayerGroup>
             <Pane name="textPane" style={{ zIndex: 700 }} />
