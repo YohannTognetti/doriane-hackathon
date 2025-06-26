@@ -14,7 +14,6 @@ export const Route = createFileRoute('/')({
 
 function HomeComponent() {
     const isDrawing = useAtomValue(drawnInProgressAtom)
-    console.log(store.get(managerAtom))
     return (
         <div
             style={{
@@ -55,12 +54,7 @@ function HomeComponent() {
                 >
                     Add sensor
                 </Button>
-                <Button
-                    onClick={() => DataHelper.startDrawing('TRIAL')}
-                    disabled={isDrawing}
-                >
-                    Add trial
-                </Button>
+
                 <Button
                     onClick={() => DataHelper.startDrawing('STATION')}
                     disabled={isDrawing}

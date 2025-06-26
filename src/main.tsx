@@ -7,6 +7,8 @@ import './main.css'
 import '@geoman-io/leaflet-geoman-free'
 import 'leaflet/dist/leaflet.css'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
+import 'leaflet-geometryutil'
+
 // Set up a Router instance
 const router = createRouter({
     routeTree,

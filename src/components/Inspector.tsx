@@ -9,16 +9,29 @@ import {
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useAtom, useAtomValue } from 'jotai'
 import { selectAtom } from 'jotai/utils'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import {
     IItem,
+    itemFieldEditAtom,
     managerAtom,
     removeItem,
     selectedInspectorAtom,
+    store,
 } from '../store/global-store'
+import {
+    angleAtom,
+    heightAtom,
+    offsetXAtom,
+    offsetYAtom,
+    previewStartAtom,
+    spaceHorizontalAtom,
+    spaceVerticalAtom,
+    widthAtom,
+} from '../store/grid-store'
+import { DataHelper } from '../store/helper'
 import { PathItem } from '../store/path-store'
 import { plotField, PlotInfo } from '../store/plot-store'
-import DataInput from './Input'
+import DataInput, { DataInputSlider } from './Input'
 import { GridTool } from './LeftMenu'
 
 export default function Inspector() {
@@ -64,13 +77,17 @@ export default function Inspector() {
                 >
                     {selectedItems.map((elt) => (
                         <MenuItem
+                            key={elt.id}
                             value={elt.id}
                         >{`${elt.type} - ${elt.id} ${elt.data.name ?? ''}`}</MenuItem>
                     ))}
                 </Select>
             </FormControl>
             {item && item.type === 'PLOT' && <PlotInspector plot={item.data} />}
+            {item && item.type === 'FIELD' && <FieldInspector item={item} />}
+
             {item && item.type === 'PATH' && <PathInspector path={item} />}
+            {item && item.type === 'TRIAL' && <TrialInspector item={item} />}
             <Button
                 onClick={() => removeItem(item.id)}
                 color="warning"
@@ -78,7 +95,6 @@ export default function Inspector() {
             >
                 Remove item
             </Button>
-            <GridTool />
         </Box>
     )
 }
@@ -96,6 +112,93 @@ function PlotInspector({ plot }: { plot: PlotInfo }) {
             />
         </Box>
     )
+}
+
+function TrialInspector({ item }: { item: IItem }) {
+    return (
+        <Box width="100%" display={'flex'} flexDirection={'column'} gap={'8px'}>
+            <Box>Trial : {item.id}</Box>
+            <DataInput label="name" atom={itemFieldEditAtom(item.id, 'name')} />
+        </Box>
+    )
+}
+
+function FieldInspector({ item }: { item: IItem<any> }) {
+    const previewRef = useRef<any>([])
+    const previewStart = useAtomValue(previewStartAtom)
+    usePreviewManager(item.id)
+    return (
+        <Box width="100%" display={'flex'} flexDirection={'column'} gap={'8px'}>
+            <Box>id : {item.id}</Box>
+            <DataInput label="spaceHorizontal" atom={spaceHorizontalAtom} />
+            <DataInput label="spaceVertical" atom={spaceVerticalAtom} />
+            <DataInput label="widthAtom" atom={widthAtom} />
+            <DataInput label="heightAtom" atom={heightAtom} />
+            <DataInputSlider
+                label="angle"
+                atom={angleAtom}
+                min={0}
+                max={90}
+                step={0.2}
+            />
+            <DataInputSlider
+                label="offsetX"
+                atom={offsetXAtom}
+                min={-20}
+                max={20}
+                step={0.1}
+            />
+            <DataInputSlider
+                label="offsetY"
+                atom={offsetYAtom}
+                min={-20}
+                max={20}
+            />
+
+            <Button
+                onClick={() => store.set(previewStartAtom, (prev) => !prev)}
+            >
+                {previewStart ? 'Stop preview' : 'Start preview'}
+            </Button>
+            <Button
+                onClick={() => {
+                    store.set(previewStartAtom, false)
+                    DataHelper.computeFieldPlot(item.id)
+                    DataHelper.removePreviewPolygons()
+                }}
+            >
+                generate plots
+            </Button>
+        </Box>
+    )
+}
+
+export function usePreviewManager(id: string) {
+    const previewStart = useAtomValue(previewStartAtom)
+    const spaceHorizontal = useAtomValue(spaceHorizontalAtom)
+    const spaceVertical = useAtomValue(spaceVerticalAtom)
+    const width = useAtomValue(widthAtom)
+    const height = useAtomValue(heightAtom)
+    const angle = useAtomValue(angleAtom)
+    const offsetX = useAtomValue(offsetXAtom)
+    const offsetY = useAtomValue(offsetYAtom)
+    useEffect(() => {
+        if (!previewStart) {
+            DataHelper.removePreviewPolygons()
+        } else {
+            DataHelper.previewFieldPlot(id)
+        }
+    }, [
+        previewStart,
+        spaceHorizontal,
+        spaceVertical,
+        width,
+        height,
+        angle,
+        offsetX,
+        offsetY,
+    ])
+    return null
 }
 
 function PathInspector(props: { path: PathItem }) {

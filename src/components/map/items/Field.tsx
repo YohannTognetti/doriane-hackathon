@@ -16,9 +16,16 @@ export default function Field(props: { id: string }) {
             ring.map((point: any) => [point[1], point[0]])
         )
     }, [value.geo])
+    const color = '#0077ea'
 
     return (
-        <Polygon positions={coordinates} bloomeoId={value.id} color="blue">
+        <Polygon
+            positions={coordinates}
+            bloomeoId={value.id}
+            color={color}
+            pane={'fieldPane'}
+            key={color}
+        >
             <Tooltip permanent direction="center" className="no-bg-tooltip">
                 {/* Ton texte ici */}
                 {value.id}

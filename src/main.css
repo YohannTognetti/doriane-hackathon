@@ -13,3 +13,8 @@
     box-shadow: none !important;
     font-weight: bold; /* optionnel */
 }
+
+span.MuiSlider-markLabel.MuiSlider-markLabel[data-index='3'] {
+    color: #452299 !important; /* Couleur du texte */
+    font-weight: bold; /* Mettre le texte en gras */
+}

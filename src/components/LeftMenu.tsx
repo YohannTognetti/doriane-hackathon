@@ -8,6 +8,7 @@ import {
     itemsAtom,
     managerAtom,
     resetAll,
+    searchAtom,
     selectItem,
     store,
     toggleHidden,
@@ -59,11 +60,6 @@ export default function Toolbox() {
                 RESET
             </Button>
             <ItemsTool></ItemsTool>
-            <Box>
-                Selected tool : {modeSelected}
-                {modeSelected === ETool.ADD_GRID && <GridTool />}
-                {modeSelected === ETool.MAKE_PATH && <PathTool />}
-            </Box>
         </Box>
     )
 }
@@ -103,44 +99,51 @@ export function ItemsTool() {
         enabled: true,
     })
     return (
-        <Box marginTop={'auto'} overflow={'hidden'} width={'100%'}>
-            <div
-                ref={parentRef}
-                className="List"
-                style={{
-                    height: 400,
-                    overflowY: 'auto',
-                    contain: 'strict',
-                }}
-            >
+        <>
+            <DataInput
+                atom={searchAtom}
+                label="Search"
+                sx={{ marginTop: 'auto' }}
+            />
+            <Box overflow={'hidden'} width={'100%'}>
                 <div
+                    ref={parentRef}
+                    className="List"
                     style={{
-                        height: `${virtualizer.getTotalSize()}px`,
-                        width: '100%',
-                        position: 'relative',
+                        height: 400,
+                        overflowY: 'auto',
+                        contain: 'strict',
                     }}
                 >
-                    {virtualizer.getVirtualItems().map((virtualRow) => {
-                        const item = items?.[virtualRow.index] || ''
-                        return (
-                            <Box
-                                key={item.id}
-                                sx={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    width: '100%',
-                                    height: `${virtualRow.size}px`,
-                                    transform: `translateY(${virtualRow.start}px)`,
-                                }}
-                            >
-                                <ItemTool id={item.id} />
-                            </Box>
-                        )
-                    })}
+                    <div
+                        style={{
+                            height: `${virtualizer.getTotalSize()}px`,
+                            width: '100%',
+                            position: 'relative',
+                        }}
+                    >
+                        {virtualizer.getVirtualItems().map((virtualRow) => {
+                            const item = items?.[virtualRow.index] || ''
+                            return (
+                                <Box
+                                    key={item.id}
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: `${virtualRow.size}px`,
+                                        transform: `translateY(${virtualRow.start}px)`,
+                                    }}
+                                >
+                                    <ItemTool id={item.id} />
+                                </Box>
+                            )
+                        })}
+                    </div>
                 </div>
-            </div>
-        </Box>
+            </Box>
+        </>
     )
 }
 

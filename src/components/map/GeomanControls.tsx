@@ -2,7 +2,27 @@ import { useEffect } from 'react'
 import { useMap } from 'react-leaflet'
 import { setMapRef } from '../../store/map-store'
 import { managerAtom, store } from '../../store/global-store'
+import { Layer } from 'leaflet'
 
+export const onEdit = (layer: Layer) => {
+    console.log('Modification d’un layer :', layer)
+
+    // Récupère l'id stocké sur le layer (ex: layer.options.storeId)
+    const id = layer.options.bloomeoId
+    if (!id) return
+
+    // Récupère les nouvelles coordonnées GeoJSON
+    const geojson = (layer as any).toGeoJSON()
+
+    // Met à jour l'objet dans l'atom
+    store.set(managerAtom, (items) => ({
+        ...items,
+        [id]: {
+            ...items[id]!,
+            geo: geojson,
+        },
+    }))
+}
 export default function GeomanControls() {
     const map = useMap()
     setMapRef(map) // Store the map reference globally
@@ -35,20 +55,23 @@ export default function GeomanControls() {
         // })
 
         const onEdit = (e: any) => {
-            e.layers.eachLayer((layer: any) => {
+            console.log('Modification d’un objet :', e)
+            e.layers.eachLayer((layer: Layer) => {
+                console.log('Modification d’un layer :', layer)
+
                 // Récupère l'id stocké sur le layer (ex: layer.options.storeId)
-                const id = layer.options.storeId
+                const id = layer.options.bloomeoId
                 if (!id) return
 
                 // Récupère les nouvelles coordonnées GeoJSON
-                const geojson = layer.toGeoJSON()
+                const geojson = (layer as any).toGeoJSON()
 
                 // Met à jour l'objet dans l'atom
                 store.set(managerAtom, (items) => ({
                     ...items,
                     [id]: {
-                        ...items[id],
-                        geo: geojson, // ou juste geometry si tu veux
+                        ...items[id]!,
+                        geo: geojson,
                     },
                 }))
             })
@@ -57,7 +80,7 @@ export default function GeomanControls() {
         map.on('pm:edit', onEdit)
         return () => {
             map.pm.removeControls()
-            // map.off('pm:create')
+            map.off('pm:edit')
         }
     }, [map])
 

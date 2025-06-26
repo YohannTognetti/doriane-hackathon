@@ -1,15 +1,29 @@
 import L from 'leaflet'
-import { Polygon } from 'geojson'
+import { Polygon, Position } from 'geojson'
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
 import {
     getUniqueId,
     store,
     managerAtom,
     ItemType,
     IItem,
+    timelineDate,
 } from './global-store'
 import { drawnInProgressAtom, getMapRef } from './map-store'
-import { gridGapXAtom, gridNbColAtom, getAllGridOptions } from './grid-store'
+import {
+    gridGapXAtom,
+    gridNbColAtom,
+    getAllGridOptions,
+    spaceHorizontalAtom,
+    spaceVerticalAtom,
+    widthAtom,
+    heightAtom,
+    angleAtom,
+    offsetXAtom,
+    offsetYAtom,
+} from './grid-store'
 
+let preview: any[] = []
 export abstract class DataHelper {
     static drawingGrid() {
         const mapRef = getMapRef()
@@ -291,13 +305,16 @@ export abstract class DataHelper {
             })
         }
     }
-    static addItem(kind: ItemType, polygon: Polygon) {
+    static addItem(kind: ItemType, polygon: Polygon, parent?: string) {
         const id = getUniqueId()
+
         store.set(managerAtom, (item) => {
             return {
                 ...item,
                 [id]: {
                     id: id,
+                    startDate: store.get(timelineDate),
+                    parent: parent,
                     data: {
                         id: id.toString(),
                     },
@@ -312,7 +329,7 @@ export abstract class DataHelper {
             }
         })
     }
-    static addManyItem(kind: ItemType, polygons: Polygon[]) {
+    static addManyItem(kind: ItemType, polygons: Polygon[], parent?: string) {
         const itemsToAdd: [string, IItem][] = polygons.map((polygon) => {
             const id = getUniqueId().toString()
             const item: IItem = {
@@ -322,6 +339,7 @@ export abstract class DataHelper {
                 },
                 type: kind,
                 selected: true,
+                parent: parent,
                 geo: {
                     type: 'Feature',
                     properties: {},
@@ -337,6 +355,7 @@ export abstract class DataHelper {
             }
             return newItems
         })
+        return itemsToAdd.map(([id]) => id)
     }
 
     static stopDrawing() {
@@ -396,5 +415,278 @@ export abstract class DataHelper {
             [map.unproject(q3).lat, map.unproject(q3).lng],
             [map.unproject(q0).lat, map.unproject(q0).lng],
         ]
+    }
+
+    static computeFieldPlot(id: string) {
+        const element = store.get(managerAtom)[id]
+        if (
+            !element ||
+            element.type !== 'FIELD' ||
+            element.geo.geometry.type !== 'Polygon'
+        )
+            return null
+
+        // Paramètres du store (en mètres et degrés)
+        const spaceH = Number(store.get(spaceHorizontalAtom))
+        const spaceV = Number(store.get(spaceVerticalAtom))
+        const plotWidth = Number(store.get(widthAtom))
+        const plotHeight = Number(store.get(heightAtom))
+        const angleDeg = Number(store.get(angleAtom))
+        const offsetXValue = Number(store.get(offsetXAtom))
+        const offsetYValue = Number(store.get(offsetYAtom))
+
+        const map = getMapRef()
+        const coords = element.geo.geometry.coordinates[0]
+        const angleRad = (angleDeg * Math.PI) / 180
+
+        // Utilise le centre du polygone comme référence pour la conversion mètres → pixels
+        const bbox = L.latLngBounds(
+            coords.map(([lng, lat]) => L.latLng(lat, lng))
+        )
+        const center = bbox.getCenter()
+        // Conversion mètres → degrés adaptée à la latitude
+        const metersPerDegreeLng =
+            111320 * Math.cos((center.lat * Math.PI) / 180)
+        const p0 = map.project(center)
+        const pX = map.project(
+            L.latLng(center.lat, center.lng + plotWidth / metersPerDegreeLng)
+        )
+        const pY = map.project(
+            L.latLng(center.lat + plotHeight / 110540, center.lng)
+        )
+        const plotWidthPx = Math.abs(pX.x - p0.x)
+        const plotHeightPx = Math.abs(pY.y - p0.y)
+
+        // Calcul du bounding box aligné (pour la grille)
+        const projected = coords.map(([lng, lat]) =>
+            map.project(L.latLng(lat, lng))
+        )
+        const rotated = projected.map((pt) => ({
+            x: pt.x * Math.cos(-angleRad) - pt.y * Math.sin(-angleRad),
+            y: pt.x * Math.sin(-angleRad) + pt.y * Math.cos(-angleRad),
+        }))
+        const minX = Math.min(...rotated.map((p) => p.x))
+        const maxX = Math.max(...rotated.map((p) => p.x))
+        const minY = Math.min(...rotated.map((p) => p.y))
+        const maxY = Math.max(...rotated.map((p) => p.y))
+
+        // Conversion espace en pixels
+        const spaceHPx = plotWidthPx * (spaceH / plotWidth)
+        const spaceVPx = plotHeightPx * (spaceV / plotHeight)
+
+        if (plotWidth <= 0 || plotHeight <= 0) return null
+
+        const plots: Polygon[] = []
+        let count = 0
+        // Balayage complet de la grille (pas d'arrêt prématuré)
+        for (let i = 0; i < 50; i++) {
+            for (let j = 0; j < 50; j++) {
+                // Centre du plot dans le repère aligné (pixels)
+                const gx =
+                    minX +
+                    offsetXValue +
+                    i * (plotWidthPx + spaceHPx) +
+                    plotWidthPx / 2
+                const gy =
+                    minY +
+                    offsetYValue +
+                    j * (plotHeightPx + spaceVPx) +
+                    plotHeightPx / 2
+                // Retour dans le repère carte
+                const px = gx * Math.cos(angleRad) - gy * Math.sin(angleRad)
+                const py = gx * Math.sin(angleRad) + gy * Math.cos(angleRad)
+                const plotCenter = L.point(px, py)
+                const plotCenterLatLng = map.unproject(plotCenter)
+
+                // Coins du plot
+                const halfW = plotWidthPx / 2
+                const halfH = plotHeightPx / 2
+                const corners = [
+                    [-halfW, -halfH],
+                    [halfW, -halfH],
+                    [halfW, halfH],
+                    [-halfW, halfH],
+                    [-halfW, -halfH],
+                ]
+                const plotCoords = corners.map(([dx, dy]) => {
+                    const cx = gx + dx
+                    const cy = gy + dy
+                    const fx = cx * Math.cos(angleRad) - cy * Math.sin(angleRad)
+                    const fy = cx * Math.sin(angleRad) + cy * Math.cos(angleRad)
+                    const ptPx = L.point(fx, fy)
+                    const latlng = map.unproject(ptPx)
+                    return [latlng.lng, latlng.lat]
+                })
+
+                // Test inclusion de tous les coins dans le polygone
+                const turfPoly = {
+                    type: 'Polygon',
+                    coordinates: [
+                        coords[0][0] !== coords[coords.length - 1][0] ||
+                        coords[0][1] !== coords[coords.length - 1][1]
+                            ? [...coords, coords[0]]
+                            : coords,
+                    ],
+                } as Polygon
+                const allCornersInside = plotCoords.every(([lng, lat]) =>
+                    booleanPointInPolygon(
+                        {
+                            type: 'Point',
+                            coordinates: [lng, lat],
+                        } as import('geojson').Point,
+                        turfPoly,
+                        { ignoreBoundary: false }
+                    )
+                )
+                if (allCornersInside) {
+                    plots.push({
+                        type: 'Polygon',
+                        coordinates: [plotCoords],
+                    } as Polygon)
+                    count++
+                    if (count >= 2500) break
+                }
+            }
+            if (count >= 2500) break
+        }
+        DataHelper.addManyItem('PLOT', plots, id)
+    }
+
+    /**
+     * Prévisualise la grille de plots sur la carte sans les ajouter au store.
+     * Retourne la liste des objets L.Polygon créés.
+     */
+    static previewFieldPlot(id: string): L.Polygon[] {
+        DataHelper.removePreviewPolygons()
+        const map = getMapRef()
+        const element = store.get(managerAtom)[id]
+        if (
+            !element ||
+            element.type !== 'FIELD' ||
+            element.geo.geometry.type !== 'Polygon'
+        )
+            return []
+
+        const spaceH = Number(store.get(spaceHorizontalAtom))
+        const spaceV = Number(store.get(spaceVerticalAtom))
+        const plotWidth = Number(store.get(widthAtom))
+        const plotHeight = Number(store.get(heightAtom))
+        const angleDeg = Number(store.get(angleAtom))
+        const offsetXValue = Number(store.get(offsetXAtom))
+        const offsetYValue = Number(store.get(offsetYAtom))
+
+        const coords = element.geo.geometry.coordinates[0]
+        const angleRad = (angleDeg * Math.PI) / 180
+        const bbox = L.latLngBounds(
+            coords.map(([lng, lat]) => L.latLng(lat, lng))
+        )
+        const center = bbox.getCenter()
+        const p0 = map.project(center)
+        // Conversion mètres → degrés adaptée à la latitude
+        const metersPerDegreeLng =
+            111320 * Math.cos((center.lat * Math.PI) / 180)
+        const pX = map.project(
+            L.latLng(center.lat, center.lng + plotWidth / metersPerDegreeLng)
+        )
+        const pY = map.project(
+            L.latLng(center.lat + plotHeight / 110540, center.lng)
+        )
+        const plotWidthPx = Math.abs(pX.x - p0.x)
+        const plotHeightPx = Math.abs(pY.y - p0.y)
+        const projected = coords.map(([lng, lat]) =>
+            map.project(L.latLng(lat, lng))
+        )
+        const rotated = projected.map((pt) => ({
+            x: pt.x * Math.cos(-angleRad) - pt.y * Math.sin(-angleRad),
+            y: pt.x * Math.sin(-angleRad) + pt.y * Math.cos(-angleRad),
+        }))
+        const minX = Math.min(...rotated.map((p) => p.x))
+        const maxX = Math.max(...rotated.map((p) => p.x))
+        const minY = Math.min(...rotated.map((p) => p.y))
+        const maxY = Math.max(...rotated.map((p) => p.y))
+        const spaceHPx = plotWidthPx * (spaceH / plotWidth)
+        const spaceVPx = plotHeightPx * (spaceV / plotHeight)
+        if (plotWidth <= 0 || plotHeight <= 0) return []
+
+        const polygons: L.Polygon[] = []
+        let count = 0
+        for (let i = 0; i < 50; i++) {
+            for (let j = 0; j < 50; j++) {
+                const gx =
+                    minX +
+                    offsetXValue +
+                    i * (plotWidthPx + spaceHPx) +
+                    plotWidthPx / 2
+                const gy =
+                    minY +
+                    offsetYValue +
+                    j * (plotHeightPx + spaceVPx) +
+                    plotHeightPx / 2
+                const px = gx * Math.cos(angleRad) - gy * Math.sin(angleRad)
+                const py = gx * Math.sin(angleRad) + gy * Math.cos(angleRad)
+                const plotCenter = L.point(px, py)
+                const plotCenterLatLng = map.unproject(plotCenter)
+                const halfW = plotWidthPx / 2
+                const halfH = plotHeightPx / 2
+                const corners = [
+                    [-halfW, -halfH],
+                    [halfW, -halfH],
+                    [halfW, halfH],
+                    [-halfW, halfH],
+                    [-halfW, -halfH],
+                ]
+                const plotCoords = corners.map(([dx, dy]) => {
+                    const cx = gx + dx
+                    const cy = gy + dy
+                    const fx = cx * Math.cos(angleRad) - cy * Math.sin(angleRad)
+                    const fy = cx * Math.sin(angleRad) + cy * Math.cos(angleRad)
+                    const ptPx = L.point(fx, fy)
+                    const latlng = map.unproject(ptPx)
+                    return [latlng.lat, latlng.lng]
+                })
+                const turfPoly = {
+                    type: 'Polygon',
+                    coordinates: [
+                        coords[0][0] !== coords[coords.length - 1][0] ||
+                        coords[0][1] !== coords[coords.length - 1][1]
+                            ? [...coords, coords[0]]
+                            : coords,
+                    ],
+                } as Polygon
+                const allCornersInside = plotCoords.every(([lat, lng]) =>
+                    booleanPointInPolygon(
+                        {
+                            type: 'Point',
+                            coordinates: [lng, lat],
+                        } as import('geojson').Point,
+                        turfPoly,
+                        { ignoreBoundary: false }
+                    )
+                )
+                if (allCornersInside) {
+                    const poly = L.polygon(plotCoords as [number, number][], {
+                        color: 'orange',
+                        fillOpacity: 0.2,
+                        weight: 1,
+                        dashArray: '4,2',
+                        interactive: false,
+                    })
+                    poly.addTo(map)
+                    polygons.push(poly)
+                    count++
+                    if (count >= 2500) break
+                }
+            }
+            if (count >= 2500) break
+        }
+        preview = polygons
+        return polygons
+    }
+
+    /**
+     * Retire de la carte tous les polygones passés en argument (retour de previewFieldPlot)
+     */
+    static removePreviewPolygons() {
+        preview.forEach((p) => getMapRef().removeLayer(p))
     }
 }

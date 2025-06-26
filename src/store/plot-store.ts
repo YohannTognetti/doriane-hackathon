@@ -143,6 +143,7 @@ export const plotAtom = (plotId: string) =>
             )
         }
     )
+
 export const plotField = (
     plotId: string,
     plotField: 'name' | 'location' | 'genotype' | 'replication'

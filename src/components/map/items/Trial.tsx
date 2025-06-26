@@ -22,6 +22,7 @@ export default function Trial(props: { id: string }) {
             positions={coordinates}
             bloomeoId={value.id}
             color="white"
+            pane={'trialPane'}
         ></Polygon>
     )
 }
