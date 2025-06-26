@@ -55,9 +55,9 @@ export default function GeomanControls() {
         // })
 
         const onEdit = (e: any) => {
-            console.log('Modification d’un objet :', e)
+            // console.log('Modification d’un objet :', e)
             e.layers.eachLayer((layer: Layer) => {
-                console.log('Modification d’un layer :', layer)
+                // console.log('Modification d’un layer :', layer)
 
                 // Récupère l'id stocké sur le layer (ex: layer.options.storeId)
                 const id = layer.options.bloomeoId

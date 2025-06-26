@@ -30,7 +30,7 @@ export default function Sensor(props: { id: string }) {
         >
             <Tooltip permanent direction="center" className="no-bg-tooltip">
                 {/* Ton texte ici */}
-                {value.id}
+                {value.name ?? value.id}
             </Tooltip>
         </Polygon>
     )

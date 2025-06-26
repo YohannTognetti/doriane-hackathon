@@ -232,8 +232,15 @@ function ItemTool(props: { id: string }) {
                 checked={item.selected ?? false}
                 onChange={() => selectItem(props.id)}
             />
-            <div onDoubleClick={() => singleSelectItem(props.id)}>
-                {item.type} - {item.data.name ?? item.id}
+            <div
+                onDoubleClick={() => singleSelectItem(props.id)}
+                style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                }}
+            >
+                {item.type} - {item.name ?? item.data.name ?? item.id}
             </div>
             <IconButton onClick={() => toggleHidden(props.id)}>
                 {item.hidden ? <VisibilityOffIcon /> : <VisibilityIcon />}

@@ -20,7 +20,7 @@ function HomeComponent() {
             <div
                 style={{
                     display: 'grid',
-                    gridTemplateColumns: '200px 1fr 200px',
+                    gridTemplateColumns: '250px 1fr 200px',
                     flex: 1,
                     minHeight: 0,
                 }}
@@ -57,12 +57,7 @@ function HomeComponent() {
                     >
                         Add Station
                     </Button>
-                    <Button
-                        onClick={() => DataHelper.drawingGrid()}
-                        disabled={isDrawing}
-                    >
-                        Plot grid
-                    </Button>
+
                     <Button
                         onClick={DataHelper.stopDrawing}
                         disabled={!isDrawing}

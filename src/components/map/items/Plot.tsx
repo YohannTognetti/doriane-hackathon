@@ -91,7 +91,7 @@ export default function Plot(props: { id: string }) {
 
     useEffect(() => {
         ref.current?.on('pm:edit', (e) => {
-            console.log(e)
+            // console.log(e)
             onEdit(e.layer)
             setRerender((prev) => prev + 1) // Forcer le rerender après modification
         })
