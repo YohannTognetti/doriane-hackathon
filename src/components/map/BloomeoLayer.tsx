@@ -29,6 +29,7 @@ export default function BloomeoLayer() {
     console.log(store.get(managerAtom))
     return (
         <LayerGroup>
+            <Pane name="textPane" style={{ zIndex: 700 }} />
             <Pane name="plotPane" style={{ zIndex: 650 }} />
             <Pane name="trialPane" style={{ zIndex: 651 }} />
             <Pane name="fieldPane" style={{ zIndex: 652 }} />

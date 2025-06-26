@@ -14864,6 +14864,22 @@ export function selectItem(id: string) {
     })
     store.set(selectedInspectorAtom, id)
 }
+export function singleSelectItem(id: string) {
+    store.set(
+        managerAtom,
+        produce((items) => {
+            Object.values(items).forEach((item) => {
+                if (!item) return
+                if (item.id === id) {
+                    item.selected = true
+                } else {
+                    item.selected = false
+                }
+            })
+        })
+    )
+    store.set(selectedInspectorAtom, id)
+}
 export function toggleHidden(id: string) {
     store.set(managerAtom, (items) => {
         if (!items[id]) return items

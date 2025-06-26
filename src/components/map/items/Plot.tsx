@@ -1,4 +1,4 @@
-import { IItem, itemAtom } from '../../../store/global-store'
+import { IItem, itemAtom, singleSelectItem } from '../../../store/global-store'
 import { useAtomValue } from 'jotai'
 import { Polygon, Tooltip, useMap } from 'react-leaflet'
 import { PlotInfo } from '../../../store/plot-store'
@@ -95,12 +95,13 @@ export default function Plot(props: { id: string }) {
             onEdit(e.layer)
             setRerender((prev) => prev + 1) // Forcer le rerender après modification
         })
+
         return () => {
             ref.current?.off('pm:edit')
         }
     }, [])
     if (!isVisible) return null
-    const color = '#0099ea'
+    const color = value.selected ? '#00bbea' : '#0099ea'
     return (
         <Polygon
             positions={coordinates}
@@ -109,6 +110,11 @@ export default function Plot(props: { id: string }) {
             ref={ref}
             pane={'plotPane'}
             key={color}
+            eventHandlers={{
+                click: () => {
+                    singleSelectItem(value.id)
+                },
+            }}
         >
             {showText && (
                 <Tooltip
@@ -117,7 +123,7 @@ export default function Plot(props: { id: string }) {
                     direction="center"
                     className="no-bg-tooltip"
                 >
-                    {surface.toFixed(2)} m²
+                    {value.name ?? value.id}
                 </Tooltip>
             )}
         </Polygon>

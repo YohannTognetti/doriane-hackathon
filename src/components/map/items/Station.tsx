@@ -18,10 +18,15 @@ export default function Station(props: { id: string }) {
                 value.geo.geometry.coordinates[1],
                 value.geo.geometry.coordinates[0],
             ]}
+            key={value.id}
         >
-            <Tooltip permanent direction="center" className="no-bg-tooltip">
-                {/* Ton texte ici */}
-                {value.id}
+            <Tooltip
+                permanent
+                direction="center"
+                className="no-bg-tooltip"
+                offset={[0, -20]}
+            >
+                {value.name}
             </Tooltip>
         </Marker>
     )

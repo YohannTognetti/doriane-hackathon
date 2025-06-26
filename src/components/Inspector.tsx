@@ -31,8 +31,10 @@ import {
 import { DataHelper } from '../store/helper'
 import { PathItem } from '../store/path-store'
 import { plotField, PlotInfo } from '../store/plot-store'
-import DataInput, { DataInputSlider } from './Input'
+import DataInput, { DataDate, DataInputSlider } from './Input'
 import { GridTool } from './LeftMenu'
+import booleanIntersects from '@turf/boolean-intersects'
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
 
 export default function Inspector() {
     const [currentItem, setCurrentItem] = useAtom(selectedInspectorAtom)
@@ -57,6 +59,33 @@ export default function Inspector() {
             setCurrentItem(item.id)
         }
     }, [selectedItems.length])
+    // Liste des items en collision géographique avec l'item courant
+    const allItems = useAtomValue(managerAtom)
+    const collision: IItem[] = useMemo(() => {
+        if (!item || !item.geo?.geometry) return []
+        const currentGeom = item.geo.geometry
+        return Object.values(allItems).filter(
+            (other) =>
+                other &&
+                other.id !== item.id &&
+                other.geo?.geometry &&
+                // Collision Polygon/Polygon ou Point/Polygon ou Polygon/Point
+                ((currentGeom.type === 'Polygon' &&
+                    other.geo.geometry.type === 'Polygon' &&
+                    booleanIntersects(currentGeom, other.geo.geometry)) ||
+                    (currentGeom.type === 'Polygon' &&
+                        other.geo.geometry.type === 'Point' &&
+                        booleanPointInPolygon(
+                            other.geo.geometry,
+                            currentGeom
+                        )) ||
+                    (currentGeom.type === 'Point' &&
+                        other.geo.geometry.type === 'Polygon' &&
+                        booleanPointInPolygon(currentGeom, other.geo.geometry)))
+        ) as IItem[]
+    }, [item, allItems])
+    const asPlotCollision =
+        collision.filter((elt) => elt.type === 'PLOT').length === 0
     return (
         <Box
             width="100%"
@@ -64,7 +93,10 @@ export default function Inspector() {
             display={'flex'}
             flexDirection={'column'}
             paddingX={'8px'}
+            padding={'8px'}
             gap={'16px'}
+            overflow={'auto'}
+            key={item.id}
         >
             <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Items</InputLabel>
@@ -83,8 +115,11 @@ export default function Inspector() {
                     ))}
                 </Select>
             </FormControl>
+            <BasicInspector item={item} colision={collision} />
             {item && item.type === 'PLOT' && <PlotInspector plot={item.data} />}
-            {item && item.type === 'FIELD' && <FieldInspector item={item} />}
+            {item && item.type === 'FIELD' && asPlotCollision && (
+                <FieldInspector item={item} />
+            )}
 
             {item && item.type === 'PATH' && <PathInspector path={item} />}
             {item && item.type === 'TRIAL' && <TrialInspector item={item} />}
@@ -123,6 +158,49 @@ function TrialInspector({ item }: { item: IItem }) {
     )
 }
 
+function BasicInspector({
+    item,
+    colision,
+}: {
+    item: IItem
+    colision: IItem[]
+}) {
+    return (
+        <Box display={'flex'} flexDirection={'column'} gap={'8px'}>
+            <Box>
+                {item.type} : {item.id}
+            </Box>
+            <DataInput label="name" atom={itemFieldEditAtom(item.id, 'name')} />
+            <DataDate
+                label="start date"
+                atom={itemFieldEditAtom(item.id, 'startDate')}
+            />
+            <DataDate
+                label="end date"
+                atom={itemFieldEditAtom(item.id, 'endDate')}
+            />
+            {colision.length > 0 && (
+                <>
+                    <div> Attached to</div>
+                    <Box
+                        sx={{
+                            maxHeight: '200px',
+                            overflowY: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                        }}
+                    >
+                        {colision.map((elt) => (
+                            <div>
+                                {elt.type} - {elt.name ?? elt.id}
+                            </div>
+                        ))}
+                    </Box>
+                </>
+            )}
+        </Box>
+    )
+}
 function FieldInspector({ item }: { item: IItem<any> }) {
     const previewRef = useRef<any>([])
     const previewStart = useAtomValue(previewStartAtom)

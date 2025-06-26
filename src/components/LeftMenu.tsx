@@ -6,10 +6,12 @@ import { useMemo, useRef } from 'react'
 import {
     itemAtom,
     itemsAtom,
+    itemsFilteredAtom,
     managerAtom,
     resetAll,
     searchAtom,
     selectItem,
+    singleSelectItem,
     store,
     toggleHidden,
 } from '../store/global-store'
@@ -90,7 +92,7 @@ function PathTool() {
 }
 
 export function ItemsTool() {
-    const items = useAtomValue(itemsAtom)
+    const items = useAtomValue(itemsFilteredAtom)
     const parentRef = useRef<HTMLDivElement>(null)
     const virtualizer = useVirtualizer({
         count: items?.length ?? 0,
@@ -161,7 +163,9 @@ function ItemTool(props: { id: string }) {
                 checked={item.selected ?? false}
                 onChange={() => selectItem(props.id)}
             />
-            {item.type} - {item.data.name ?? item.id}
+            <div onDoubleClick={() => singleSelectItem(props.id)}>
+                {item.type} - {item.data.name ?? item.id}
+            </div>
             <IconButton onClick={() => toggleHidden(props.id)}>
                 {item.hidden ? <VisibilityOffIcon /> : <VisibilityIcon />}
             </IconButton>

@@ -7,7 +7,8 @@ import { managerAtom, store } from '../store/global-store'
 import { useAtomValue } from 'jotai'
 import Inspector from '../components/Inspector'
 import { ItemsTool } from '../components/LeftMenu'
-
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 export const Route = createFileRoute('/')({
     component: HomeComponent,
 })
@@ -15,69 +16,65 @@ export const Route = createFileRoute('/')({
 function HomeComponent() {
     const isDrawing = useAtomValue(drawnInProgressAtom)
     return (
-        <div
-            style={{
-                display: 'grid',
-                gridTemplateColumns: '200px 1fr 200px',
-                flex: 1,
-                minHeight: 0,
-            }}
-        >
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
             <div
                 style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px',
+                    display: 'grid',
+                    gridTemplateColumns: '200px 1fr 200px',
+                    flex: 1,
+                    minHeight: 0,
                 }}
             >
-                <Button
-                    onClick={() => DataHelper.startDrawing('PLOT')}
-                    disabled={isDrawing}
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                    }}
                 >
-                    Add plot
-                </Button>
-                <Button
-                    onClick={() => DataHelper.startDrawing('TRIAL')}
-                    disabled={isDrawing}
-                >
-                    Add Trial
-                </Button>
-                <Button
-                    onClick={() => DataHelper.startDrawing('FIELD')}
-                    disabled={isDrawing}
-                >
-                    Add field
-                </Button>
-                <Button
-                    onClick={() => DataHelper.startDrawing('SENSOR')}
-                    disabled={isDrawing}
-                >
-                    Add sensor
-                </Button>
+                    <Button
+                        onClick={() => DataHelper.startDrawing('TRIAL')}
+                        disabled={isDrawing}
+                    >
+                        Add Trial
+                    </Button>
+                    <Button
+                        onClick={() => DataHelper.startDrawing('FIELD')}
+                        disabled={isDrawing}
+                    >
+                        Add field
+                    </Button>
+                    <Button
+                        onClick={() => DataHelper.startDrawing('SENSOR')}
+                        disabled={isDrawing}
+                    >
+                        Add sensor
+                    </Button>
 
-                <Button
-                    onClick={() => DataHelper.startDrawing('STATION')}
-                    disabled={isDrawing}
-                >
-                    Add Station
-                </Button>
-                <Button
-                    onClick={() => DataHelper.drawingGrid()}
-                    disabled={isDrawing}
-                >
-                    Plot grid
-                </Button>
-                <Button
-                    onClick={DataHelper.stopDrawing}
-                    disabled={!isDrawing}
-                    color="error"
-                >
-                    Cancel
-                </Button>
-                <ItemsTool />
+                    <Button
+                        onClick={() => DataHelper.startDrawing('STATION')}
+                        disabled={isDrawing}
+                    >
+                        Add Station
+                    </Button>
+                    <Button
+                        onClick={() => DataHelper.drawingGrid()}
+                        disabled={isDrawing}
+                    >
+                        Plot grid
+                    </Button>
+                    <Button
+                        onClick={DataHelper.stopDrawing}
+                        disabled={!isDrawing}
+                        color="error"
+                    >
+                        Cancel
+                    </Button>
+                    <ItemsTool />
+                </div>
+                <MapWrapper />
+                <Inspector />
             </div>
-            <MapWrapper />
-            <Inspector />
-        </div>
+        </LocalizationProvider>
     )
 }

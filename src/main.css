@@ -8,10 +8,11 @@
 }
 
 .leaflet-tooltip.no-bg-tooltip {
-    background: transparent !important;
+    background: #ffffff80 !important;
     border: none !important;
     box-shadow: none !important;
     font-weight: bold; /* optionnel */
+    color: black;
 }
 
 span.MuiSlider-markLabel.MuiSlider-markLabel[data-index='3'] {

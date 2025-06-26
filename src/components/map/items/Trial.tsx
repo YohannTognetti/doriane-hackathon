@@ -1,7 +1,7 @@
 import { useAtomValue } from 'jotai'
 import { useMemo } from 'react'
 import { Polygon, Tooltip } from 'react-leaflet'
-import { IItem, itemAtom } from '../../../store/global-store'
+import { IItem, itemAtom, singleSelectItem } from '../../../store/global-store'
 
 export default function Trial(props: { id: string }) {
     const value = useAtomValue(
@@ -16,13 +16,19 @@ export default function Trial(props: { id: string }) {
             ring.map((point: any) => [point[1], point[0]])
         )
     }, [value.geo])
-
+    const colors = value.selected ? '#FFF' : '#ccc'
     return (
         <Polygon
             positions={coordinates}
             bloomeoId={value.id}
-            color="white"
+            color={colors}
             pane={'trialPane'}
+            eventHandlers={{
+                click: () => {
+                    singleSelectItem(value.id)
+                },
+            }}
+            key={colors}
         ></Polygon>
     )
 }

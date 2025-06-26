@@ -1,7 +1,8 @@
 import { useAtomValue } from 'jotai'
 import { Polygon, Tooltip } from 'react-leaflet'
 import { useMemo } from 'react'
-import { itemAtom, IItem } from '../../../store/global-store'
+import { itemAtom, IItem, singleSelectItem } from '../../../store/global-store'
+import area from '@turf/area'
 
 export default function Field(props: { id: string }) {
     const value = useAtomValue(
@@ -16,7 +17,14 @@ export default function Field(props: { id: string }) {
             ring.map((point: any) => [point[1], point[0]])
         )
     }, [value.geo])
-    const color = '#0077ea'
+    const color = value.selected ? '#0099ea' : '#0077ea'
+    const surface = useMemo(() => {
+        return area({
+            type: 'Feature',
+            geometry: value.geo.geometry,
+            properties: {},
+        })
+    }, [value.geo])
 
     return (
         <Polygon
@@ -25,10 +33,19 @@ export default function Field(props: { id: string }) {
             color={color}
             pane={'fieldPane'}
             key={color}
+            eventHandlers={{
+                click: () => {
+                    singleSelectItem(value.id)
+                },
+            }}
         >
-            <Tooltip permanent direction="center" className="no-bg-tooltip">
-                {/* Ton texte ici */}
-                {value.id}
+            <Tooltip
+                permanent
+                direction="center"
+                className="no-bg-tooltip"
+                pane="textPane"
+            >
+                {value.name ?? value.id} - {surface.toFixed(2)} m²
             </Tooltip>
         </Polygon>
     )
